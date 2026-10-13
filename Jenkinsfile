@@ -44,25 +44,25 @@ pipeline {
       }
 
       stages {
-        // package.json의 pnpm 버전과 잠금 파일에 맞춰 의존성을 설치한다.
+        // Jenkins는 일반 사용자로 실행되므로 pnpm을 쓰기 가능한 작업 공간에 설치한다.
         stage('Install') {
           steps {
-            sh '''npm install --global "$(node -p 'require("./package.json").packageManager')"'''
-            sh 'pnpm install --frozen-lockfile'
+            sh '''npm install --prefix .ci-tools --no-save --package-lock=false "$(node -p 'require("./package.json").packageManager')"'''
+            sh './.ci-tools/node_modules/.bin/pnpm install --frozen-lockfile'
           }
         }
 
         // PR 머지 전에 ESLint 오류를 찾는다.
         stage('Lint') {
           steps {
-            sh 'pnpm lint'
+            sh './.ci-tools/node_modules/.bin/pnpm lint'
           }
         }
 
         // TypeScript 검사와 Vite 빌드를 실행하되, 배포는 하지 않는다.
         stage('Build') {
           steps {
-            sh 'pnpm build'
+            sh './.ci-tools/node_modules/.bin/pnpm build'
           }
         }
       }
