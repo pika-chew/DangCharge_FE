@@ -4,4 +4,3 @@ export { ReservationDatePicker } from '@/components/reservation/ReservationDateP
 export { StartTimePicker } from '@/components/reservation/StartTimePicker'
 export { CompletionHero } from '@/components/reservation/CompletionHero'
 export { ReservationInfoCard } from '@/components/reservation/ReservationInfoCard'
-export { StopChargingDialog } from '@/components/reservation/StopChargingDialog'

@@ -2,8 +2,11 @@ import { FileCheckCorner } from 'lucide-react'
 import { ChargeRecordCard } from '@/components/history'
 import { BackLink } from '@/components/layout'
 import { sampleChargeRecords } from '@/constants'
+import { useChargeRecords } from '@/hooks'
 
 export function HistoryPage() {
+  const { records, completeCharging } = useChargeRecords(sampleChargeRecords)
+
   return (
     <div className="mx-auto w-full max-w-[760px] px-6 py-10">
       <BackLink to="/mypage" label="마이페이지" />
@@ -13,8 +16,8 @@ export function HistoryPage() {
       </div>
 
       <div className="mt-10 grid gap-4">
-        {sampleChargeRecords.map((record) => (
-          <ChargeRecordCard key={record.id} record={record} />
+        {records.map((record) => (
+          <ChargeRecordCard key={record.id} record={record} onCompleteCharging={completeCharging} />
         ))}
       </div>
     </div>

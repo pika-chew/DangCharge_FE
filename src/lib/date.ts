@@ -17,3 +17,7 @@ export function formatRelativeDate(value: string, today = new Date()) {
   const [, month, day] = value.split('-').map(Number)
   return `${month}월 ${day}일`
 }
+
+export function formatTime(date: Date) {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}

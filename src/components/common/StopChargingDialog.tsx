@@ -1,4 +1,4 @@
-import { ConfirmDialog } from '@/components/common'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
 type StopChargingDialogProps = {
   onConfirm: () => void

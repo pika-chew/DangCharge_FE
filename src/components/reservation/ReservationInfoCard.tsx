@@ -1,6 +1,6 @@
 import { ArrowRight, Clock, MapPin, Zap, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router'
-import { StopChargingDialog } from '@/components/reservation/StopChargingDialog'
+import { StopChargingDialog } from '@/components/common'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
 
