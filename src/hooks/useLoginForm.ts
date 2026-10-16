@@ -3,7 +3,7 @@ import { isAxiosError } from 'axios'
 import { useRef, type FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { commandApi } from '@/api'
+import { commandApi, getServerErrorMessage } from '@/api'
 import { isAuthTokens } from '@/lib/auth'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -13,15 +13,6 @@ const loginSchema = z.object({
 })
 
 export type LoginFormValues = z.infer<typeof loginSchema>
-
-const errorResponseSchema = z.object({
-  error: z.object({ message: z.string().trim().min(1) }),
-})
-
-function getServerErrorMessage(data: unknown) {
-  const result = errorResponseSchema.safeParse(data)
-  return result.success ? result.data.error.message : undefined
-}
 
 function getLoginErrorMessage(error: unknown) {
   if (isAxiosError(error)) {
