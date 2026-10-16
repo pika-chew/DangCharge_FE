@@ -1,5 +1,4 @@
 export type { StationListItem, StationMarker, StationCoordinates, StationSearchArea } from '@/types/station'
-export type { SampleMyPage } from '@/types/mypage'
 export type { SampleChargeRecord } from '@/types/history'
 export type { SampleCharger, SampleChargerStatus, SampleStationDetail } from '@/types/stationDetail'
 export type { ReservationDateOption } from '@/types/reservation'

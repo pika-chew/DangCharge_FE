@@ -18,11 +18,12 @@ function selectVehicleModels(response: queryApi.ApiResponseDtoListVehicleModelRe
   return result.data.map(({ code, label }) => ({ value: code, label }))
 }
 
-export function useVehicleModels() {
+export function useVehicleModels(enabled = true) {
   return queryApi.useGetVehicleModels({
     query: {
       select: selectVehicleModels,
       retry: false,
+      enabled,
     },
   })
 }
