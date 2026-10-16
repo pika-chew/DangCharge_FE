@@ -46,8 +46,8 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<HeaderlessLayout />}>
           <Route path="history" element={<HistoryPage />} />
-          <Route path="reservation/:chargerId" element={<ReservationPage />} />
-          <Route path="reservation/complete" element={<ReservationCompletePage />} />
+          <Route path="stations/:stationId/reservation/:chargerId" element={<ReservationPage />} />
+          <Route path="reservation/complete/:reservationId" element={<ReservationCompletePage />} />
         </Route>
         <Route element={<PageLayout />}>
           <Route index element={<MainPage />} />

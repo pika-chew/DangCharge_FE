@@ -1,16 +1,14 @@
 import { ArrowRight, Clock, MapPin, Zap, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router'
-import { StopChargingDialog } from '@/components/common'
 import { Button } from '@/components/ui'
+import { ReservationActions } from '@/components/reservation/ReservationActions'
 import { cn } from '@/lib/utils'
+import { formatReservationDateTime } from '@/lib/date'
+import type { ReservationDetail } from '@/types'
 
 type ReservationInfoCardProps = {
-  stationName: string
-  address: string
-  startTimeLabel: string
-  reservationNumber: string
-  chargingCompleted: boolean
-  onCompleteCharging: () => void
+  reservation: ReservationDetail
+  onUpdated: (reservation: ReservationDetail) => void
 }
 
 function InfoTile({ icon: Icon, value, label }: { icon: LucideIcon; value: string; label: string }) {
@@ -23,14 +21,18 @@ function InfoTile({ icon: Icon, value, label }: { icon: LucideIcon; value: strin
   )
 }
 
-export function ReservationInfoCard({
-  stationName,
-  address,
-  startTimeLabel,
-  reservationNumber,
-  chargingCompleted,
-  onCompleteCharging,
-}: ReservationInfoCardProps) {
+const statusLabels: Record<NonNullable<ReservationDetail['status']>, string> = {
+  CONFIRMED: '예약 확정',
+  CHARGING: '충전중',
+  CANCELLED: '예약 취소',
+  COMPLETED: '충전 완료',
+  NO_SHOW: '예약 종료',
+}
+
+export function ReservationInfoCard({ reservation, onUpdated }: ReservationInfoCardProps) {
+  const startTimeLabel = reservation.startAt ? formatReservationDateTime(reservation.startAt) : null
+  const active = reservation.status === 'CONFIRMED' || reservation.status === 'CHARGING'
+
   return (
     <article className="rounded-26 bg-surface p-8 shadow-card" aria-labelledby="reservation-info-title">
       <div className="flex items-center justify-between gap-2">
@@ -38,32 +40,42 @@ export function ReservationInfoCard({
         <span
           className={cn(
             'rounded-full px-3 py-1 text-label-12',
-            chargingCompleted ? 'bg-success-subtle text-success' : 'bg-brand-subtle text-brand',
+            active ? 'bg-brand-subtle text-brand' : reservation.status === 'COMPLETED'
+              ? 'bg-success-subtle text-success' : 'bg-canvas text-fg-secondary',
           )}
         >
-          {chargingCompleted ? '충전 완료' : '예약 확정'}
+          {reservation.status ? statusLabels[reservation.status] : '예약 정보'}
         </span>
       </div>
 
-      <h3 className="mt-8 text-heading-20 text-fg-primary">{stationName}</h3>
-      <p className="mt-2 flex items-center gap-1 text-body-14 text-fg-secondary">
-        <MapPin className="size-4 shrink-0" aria-hidden />
-        {address}
-      </p>
+      <h3 className="mt-8 text-heading-20 text-fg-primary">{reservation.stationName ?? '충전소 정보 없음'}</h3>
+      {reservation.stationAddress && (
+        <p className="mt-2 flex items-center gap-1 text-body-14 text-fg-secondary">
+          <MapPin className="size-4 shrink-0" aria-hidden />
+          {reservation.stationAddress}
+        </p>
+      )}
 
       <div className="mt-7 grid grid-cols-2 gap-3">
-        <InfoTile icon={Clock} value={startTimeLabel} label="이용 시작" />
-        <InfoTile icon={Zap} value={`예약 번호 ${reservationNumber}`} label="차량 인증용" />
+        <InfoTile icon={Clock} value={startTimeLabel ?? '시간 정보 없음'} label="이용 시작" />
+        <InfoTile
+          icon={Zap}
+          value={reservation.number ? `예약 번호 ${reservation.number}` : reservation.chargerId ? `충전기 ${reservation.chargerId}` : '예약 정보 없음'}
+          label={reservation.number ? '예약 번호' : '충전기'}
+        />
       </div>
 
       <div className="mt-7 grid gap-2">
-        {!chargingCompleted && <StopChargingDialog onConfirm={onCompleteCharging} />}
-        <Button asChild className="h-14 w-full gap-2 rounded-14 bg-brand text-body-14-strong text-fg-on-brand hover:bg-brand-hover">
-          <Link to="/history">
-            충전 내역
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
-        </Button>
+        {active ? (
+          <ReservationActions reservation={reservation} onUpdated={onUpdated} />
+        ) : (
+          <Button asChild className="h-14 w-full gap-2 rounded-14 bg-brand text-body-14-strong text-fg-on-brand hover:bg-brand-hover">
+            <Link to="/mypage">
+              마이페이지로
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </Button>
+        )}
       </div>
     </article>
   )

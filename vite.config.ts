@@ -11,4 +11,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      '/query': { target: 'https://api.dangcharge.cloud', changeOrigin: true },
+      '/command': { target: 'https://api.dangcharge.cloud', changeOrigin: true },
+    },
+  },
 })

@@ -1,44 +1,35 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useLocation } from 'react-router'
 import { AuthContext } from '@/hooks'
-
-// API 연결 전 데모용 로그인 표시입니다. 실제 인증 방식이 정해지면 이 Provider 안쪽만 교체합니다.
-const storageKey = 'dangcharge:demo-logged-in'
-
-function readLoggedIn() {
-  try {
-    return sessionStorage.getItem(storageKey) === 'true'
-  } catch {
-    return false
-  }
-}
-
-function writeLoggedIn(loggedIn: boolean) {
-  try {
-    if (loggedIn) sessionStorage.setItem(storageKey, 'true')
-    else sessionStorage.removeItem(storageKey)
-  } catch {
-    // 저장소를 쓸 수 없으면 현재 탭의 상태로만 유지합니다.
-  }
-}
+import { getAuthTokens, setAuthTokens, subscribeAuthSession, type AuthTokens } from '@/lib/auth'
 
 type AuthProviderProps = {
   children: ReactNode
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [isLoggedIn, setIsLoggedIn] = useState(readLoggedIn)
+  const tokens = useSyncExternalStore(subscribeAuthSession, getAuthTokens)
+  const queryClient = useQueryClient()
+  const previousSession = useRef(tokens)
+  // 경로 이동 시 저장소에서 직접 삭제된 토큰도 다시 확인합니다.
+  useLocation()
+
+  useEffect(() => {
+    if (previousSession.current && !tokens) queryClient.clear()
+    previousSession.current = tokens
+  }, [tokens, queryClient])
 
   const value = useMemo(() => ({
-    isLoggedIn,
-    login: () => {
-      writeLoggedIn(true)
-      setIsLoggedIn(true)
+    isLoggedIn: tokens !== null,
+    login: (tokens: AuthTokens) => {
+      setAuthTokens(tokens)
     },
     logout: () => {
-      writeLoggedIn(false)
-      setIsLoggedIn(false)
+      setAuthTokens(null)
+      queryClient.clear()
     },
-  }), [isLoggedIn])
+  }), [tokens, queryClient])
 
   return <AuthContext value={value}>{children}</AuthContext>
 }
