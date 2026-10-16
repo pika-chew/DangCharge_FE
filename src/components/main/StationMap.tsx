@@ -9,13 +9,13 @@ type StationMapProps = {
 export function StationMap({ stations, selectedStationId, onSelectStation }: StationMapProps) {
   return (
     <section
-      className="relative h-[430px] overflow-hidden rounded-[26px] border border-border bg-[#efedf2] min-[761px]:h-[512px]"
+      className="relative h-[430px] overflow-hidden rounded-26 border border-line bg-[#efedf2] min-[761px]:h-[512px]"
       aria-label="서울 강남구 충전소 위치 예시"
     >
       <div className="pointer-events-none absolute top-0 right-0 left-0 h-[6px] bg-[#e2dfe7]" />
       <div className="pointer-events-none absolute top-[50%] left-[-28%] h-[3px] w-[165%] rotate-[27deg] bg-[#d8d3df] blur-[1px]" />
       <div className="pointer-events-none absolute top-[50%] left-[-28%] h-[3px] w-[165%] -rotate-[64deg] bg-[#d8d3df] blur-[1px]" />
-      <span className="absolute top-6 left-6 z-10 rounded-[14px] bg-white px-3 py-2 text-xs font-semibold leading-4 shadow-[0_1px_3px_rgb(0_0_0/10%),0_1px_2px_-1px_rgb(0_0_0/10%)]">
+      <span className="absolute top-6 left-6 z-10 rounded-14 bg-surface px-3 py-2 text-xs font-semibold leading-4 shadow-[0_1px_3px_rgb(0_0_0/10%),0_1px_2px_-1px_rgb(0_0_0/10%)]">
         서울 · 강남구
       </span>
       {stations.map((station) => (

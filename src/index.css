@@ -4,13 +4,63 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --color-brand: #7257df;
+/* Figma Variables(src/constants/design-tokens.json)의 Primitive 컬렉션입니다. 화면에서는 아래 @theme의 Semantic 토큰을 씁니다. */
+:root {
+  --dc-purple: #7257df;
+  --dc-purple-dark: #30275a;
+  --dc-purple-tint: #f0ecfc;
+  --dc-white: #ffffff;
+  --dc-ink: #19171f;
+  --dc-gray: #8d8797;
+  --dc-gray-light: #aaa3b1;
+  --dc-canvas: #fbfafc;
+  --dc-border: #e5e0eb;
+  --dc-green: #2c9b63;
+  --dc-green-tint: #eaf7f0;
+}
+
+@theme inline {
+  --color-canvas: var(--dc-canvas);
+  --color-surface: var(--dc-white);
+  --color-brand: var(--dc-purple);
+  /* Figma에 없는 hover 색입니다. */
   --color-brand-hover: #6043d1;
-  --color-ink: #19171f;
-  --color-page: #fbfafc;
-  --color-subtle: #8d8797;
-  --color-success: #2c9b63;
+  --color-brand-subtle: var(--dc-purple-tint);
+  --color-success: var(--dc-green);
+  --color-success-subtle: var(--dc-green-tint);
+  --color-fg-primary: var(--dc-ink);
+  --color-fg-secondary: var(--dc-gray);
+  --color-fg-tertiary: var(--dc-gray-light);
+  --color-fg-on-brand: var(--dc-white);
+  --color-line: var(--dc-border);
+
+  --text-display-36: 36px;
+  --text-display-36--line-height: 44px;
+  --text-display-36--font-weight: 700;
+  --text-heading-24: 24px;
+  --text-heading-24--line-height: 32px;
+  --text-heading-24--font-weight: 700;
+  --text-heading-20: 20px;
+  --text-heading-20--line-height: 28px;
+  --text-heading-20--font-weight: 700;
+  --text-body-14: 14px;
+  --text-body-14--line-height: 20px;
+  --text-body-14--font-weight: 400;
+  --text-body-14-strong: 14px;
+  --text-body-14-strong--line-height: 20px;
+  --text-body-14-strong--font-weight: 700;
+  --text-label-12: 12px;
+  --text-label-12--line-height: 16px;
+  --text-label-12--font-weight: 700;
+  --text-caption-12: 12px;
+  --text-caption-12--line-height: 16px;
+  --text-caption-12--font-weight: 400;
+
+  --radius-14: 14px;
+  --radius-18: 18px;
+  --radius-26: 26px;
+
+  --shadow-card: 0 18px 60px 0 #30275a0f;
 }
 
 @layer base {
@@ -77,24 +127,24 @@
 }
 
 :root {
-  --background: #fbfafc;
-  --foreground: #19171f;
-  --card: oklch(1 0 0);
+  --background: var(--dc-canvas);
+  --foreground: var(--dc-ink);
+  --card: var(--dc-white);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #7257df;
-  --primary-foreground: #ffffff;
+  --primary: var(--dc-purple);
+  --primary-foreground: var(--dc-white);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: #f7f5fb;
-  --muted-foreground: #8d8797;
+  --muted-foreground: var(--dc-gray);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e8e3ee;
-  --input: #e5e0ec;
-  --ring: #7257df;
+  --border: var(--dc-border);
+  --input: var(--dc-border);
+  --ring: var(--dc-purple);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

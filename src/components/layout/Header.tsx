@@ -16,10 +16,10 @@ const navigation = [
 
 export function Header({ mainPage = false }: HeaderProps) {
   return (
-    <header className="h-[75px] border-b border-[#ece8f1] bg-white">
+    <header className="h-[75px] border-b border-[#ece8f1] bg-surface">
       <div className="mx-auto flex h-[74px] w-full max-w-[1180px] items-center justify-between px-6">
-        <Link className="inline-flex items-center gap-3 text-base leading-6 font-bold text-ink no-underline" to="/" aria-label="당충전 홈">
-          <span className="grid size-10 place-items-center rounded-[14px] bg-brand">
+        <Link className="inline-flex items-center gap-3 text-base leading-6 font-bold text-fg-primary no-underline" to="/" aria-label="당충전 홈">
+          <span className="grid size-10 place-items-center rounded-14 bg-brand">
             <img src={logoIcon} alt="" />
           </span>
           <span>당충전</span>
@@ -27,7 +27,7 @@ export function Header({ mainPage = false }: HeaderProps) {
 
         <nav aria-label="주요 메뉴">
           {mainPage ? (
-            <Button asChild variant="outline" className="h-[42px] gap-2 rounded-full border-[#e5e0eb] bg-white px-4 text-[13px] font-bold text-[#5f596b] hover:bg-[#f7f5fb]">
+            <Button asChild variant="outline" className="h-[42px] gap-2 rounded-full border-line bg-surface px-4 text-[13px] font-bold text-[#5f596b] hover:bg-[#f7f5fb]">
               <Link to="/mypage"><img src={userIcon} alt="" />마이페이지</Link>
             </Button>
           ) : (
