@@ -45,7 +45,7 @@ export function ChargerOption({ charger, selected, onSelect }: ChargerOptionProp
           {charger.pricePerKwh.toLocaleString('ko-KR')}원/kWh · {charger.note}
         </span>
       </span>
-      {available ? (
+      {charger.status === 'available' ? (
         <span className="flex shrink-0 items-center gap-1 text-label-12 text-success">
           {selected && <Check className="size-3.5" aria-hidden />}
           예약 가능
