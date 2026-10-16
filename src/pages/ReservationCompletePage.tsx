@@ -1,5 +1,6 @@
 import { isAxiosError } from 'axios'
-import { Link, useLocation, useParams } from 'react-router'
+import { useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { getApiErrorMessage, queryApi, selectReservationDetail } from '@/api'
 import { BackLink } from '@/components/layout'
 import { CompletionHero, ReservationInfoCard } from '@/components/reservation'
@@ -7,6 +8,8 @@ import type { ReservationDetail } from '@/types'
 
 export function ReservationCompletePage() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const [updatedReservation, setUpdatedReservation] = useState<ReservationDetail>()
   const { reservationId: reservationIdParam } = useParams()
   const reservationId = Number(reservationIdParam)
   const validReservationId = !!reservationIdParam && /^[1-9]\d*$/.test(reservationIdParam) && Number.isSafeInteger(reservationId)
@@ -22,7 +25,7 @@ export function ReservationCompletePage() {
   const reservationQuery = queryApi.useGetReservation(reservationId, {
     query: { enabled: validReservationId && !postedReservation, select: selectReservationDetail, retry: false },
   })
-  const reservation = postedReservation ?? reservationQuery.data
+  const reservation = updatedReservation ?? postedReservation ?? reservationQuery.data
 
   if (!validReservationId) {
     return (
@@ -56,9 +59,18 @@ export function ReservationCompletePage() {
   return (
     <div className="min-h-svh bg-brand-subtle/60">
       <div className="mx-auto w-full max-w-[620px] px-6 py-16">
-        <CompletionHero status={reservation.status} />
+        <BackLink to="/" label="메인으로" />
         <div className="mt-10">
-          <ReservationInfoCard reservation={reservation} />
+          <CompletionHero status={reservation.status} />
+        </div>
+        <div className="mt-10">
+          <ReservationInfoCard
+            reservation={reservation}
+            onUpdated={(nextReservation) => {
+              setUpdatedReservation(nextReservation)
+              navigate(location.pathname, { replace: true, state: null })
+            }}
+          />
         </div>
       </div>
     </div>

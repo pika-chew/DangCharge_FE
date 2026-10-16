@@ -33,6 +33,7 @@ export function ReservationStatusCard({ reservation }: ReservationStatusCardProp
       isReserved && 'bg-brand text-fg-on-brand shadow-card',
       isCharging && 'border border-line bg-success-subtle text-fg-primary',
       state === 'NONE' && 'border border-line bg-surface text-fg-primary',
+      state !== 'NONE' && detail?.reservationId && 'relative',
     )}>
       <div className="flex items-center justify-between gap-2">
         <h2 className={cn('text-label-12', isReserved ? 'text-fg-on-brand/80' : 'text-fg-secondary')}>
@@ -63,6 +64,13 @@ export function ReservationStatusCard({ reservation }: ReservationStatusCardProp
         <Link className="mt-auto inline-flex w-fit items-center gap-2 pt-6 text-label-12 text-brand no-underline" to="/">
           충전소 찾기 <ArrowRight className="size-4" aria-hidden />
         </Link>
+      )}
+      {state !== 'NONE' && detail?.reservationId && (
+        <Link
+          className="absolute inset-0 rounded-26 focus-visible:outline-3 focus-visible:outline-brand"
+          to={`/reservation/complete/${detail.reservationId}`}
+          aria-label="예약 상세 확인하기"
+        />
       )}
     </section>
   )

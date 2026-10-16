@@ -1,12 +1,14 @@
 import { ArrowRight, Clock, MapPin, Zap, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui'
+import { ReservationActions } from '@/components/reservation/ReservationActions'
 import { cn } from '@/lib/utils'
 import { formatReservationDateTime } from '@/lib/date'
 import type { ReservationDetail } from '@/types'
 
 type ReservationInfoCardProps = {
   reservation: ReservationDetail
+  onUpdated: (reservation: ReservationDetail) => void
 }
 
 function InfoTile({ icon: Icon, value, label }: { icon: LucideIcon; value: string; label: string }) {
@@ -21,13 +23,13 @@ function InfoTile({ icon: Icon, value, label }: { icon: LucideIcon; value: strin
 
 const statusLabels: Record<NonNullable<ReservationDetail['status']>, string> = {
   CONFIRMED: '예약 확정',
-  CHARGING: '충전 중',
+  CHARGING: '충전중',
   CANCELLED: '예약 취소',
   COMPLETED: '충전 완료',
   NO_SHOW: '예약 종료',
 }
 
-export function ReservationInfoCard({ reservation }: ReservationInfoCardProps) {
+export function ReservationInfoCard({ reservation, onUpdated }: ReservationInfoCardProps) {
   const startTimeLabel = reservation.startAt ? formatReservationDateTime(reservation.startAt) : null
   const active = reservation.status === 'CONFIRMED' || reservation.status === 'CHARGING'
 
@@ -64,12 +66,16 @@ export function ReservationInfoCard({ reservation }: ReservationInfoCardProps) {
       </div>
 
       <div className="mt-7 grid gap-2">
-        <Button asChild className="h-14 w-full gap-2 rounded-14 bg-brand text-body-14-strong text-fg-on-brand hover:bg-brand-hover">
-          <Link to="/mypage">
-            마이페이지로
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
-        </Button>
+        {active ? (
+          <ReservationActions reservation={reservation} onUpdated={onUpdated} />
+        ) : (
+          <Button asChild className="h-14 w-full gap-2 rounded-14 bg-brand text-body-14-strong text-fg-on-brand hover:bg-brand-hover">
+            <Link to="/mypage">
+              마이페이지로
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </Button>
+        )}
       </div>
     </article>
   )

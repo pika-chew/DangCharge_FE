@@ -16,6 +16,7 @@ export type ReservationDetail = {
   id: number
   number?: string
   startAt?: string
+  stationId?: number
   stationName?: string
   stationAddress?: string
   chargerId?: number
