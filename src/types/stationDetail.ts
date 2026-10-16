@@ -1,3 +1,19 @@
+export type StationCharger = {
+  id: number
+  chargingType?: 'FAST' | 'SLOW'
+  maxPowerKw?: number
+  status: 'AVAILABLE' | 'IN_USE' | 'OUT_OF_SERVICE' | 'UNKNOWN'
+}
+
+export type StationDetail = {
+  id: number
+  name: string
+  address?: string
+  rapidCount?: number
+  slowCount?: number
+  chargers: StationCharger[]
+}
+
 export type SampleChargerStatus = 'available' | 'in-use' | 'maintenance'
 
 export type SampleCharger = {

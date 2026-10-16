@@ -1,58 +1,42 @@
-import { Check, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { SampleCharger, SampleChargerStatus } from '@/types'
+import type { StationCharger } from '@/types'
 
 type ChargerOptionProps = {
-  charger: SampleCharger
-  selected: boolean
-  onSelect: () => void
+  charger: StationCharger
 }
 
-const unavailableLabels: Record<Exclude<SampleChargerStatus, 'available'>, string> = {
-  'in-use': '사용 중',
-  maintenance: '점검 중',
+const statusLabels: Record<StationCharger['status'], string> = {
+  AVAILABLE: '사용 가능',
+  IN_USE: '사용 중',
+  OUT_OF_SERVICE: '사용 불가',
+  UNKNOWN: '상태 확인 중',
 }
 
-export function ChargerOption({ charger, selected, onSelect }: ChargerOptionProps) {
-  const available = charger.status === 'available'
+export function ChargerOption({ charger }: ChargerOptionProps) {
+  const isAvailable = charger.status === 'AVAILABLE'
+  const chargingType = charger.chargingType === 'FAST' ? '급속'
+    : charger.chargingType === 'SLOW' ? '완속' : '종류 확인 중'
 
   return (
-    <button
-      className={cn(
-        'flex w-full items-center gap-3 rounded-18 border p-4 text-left',
-        selected ? 'border-brand bg-brand-subtle/50 ring-3 ring-brand/10' : 'border-line bg-surface',
-        available ? 'cursor-pointer hover:border-brand' : 'cursor-not-allowed opacity-50',
-      )}
-      type="button"
-      disabled={!available}
-      aria-pressed={selected}
-      onClick={onSelect}
-    >
+    <article className="flex w-full items-center gap-3 rounded-18 border border-line bg-surface p-4">
       <span
         className={cn(
           'grid size-9 shrink-0 place-items-center rounded-14',
-          charger.speed === '급속' ? 'bg-brand-subtle text-brand' : 'bg-line/60 text-fg-secondary',
+          charger.chargingType === 'FAST' ? 'bg-brand-subtle text-brand' : 'bg-line/60 text-fg-secondary',
         )}
       >
         <Zap className="size-4" aria-hidden />
       </span>
       <span className="grid min-w-0 flex-1 gap-1">
-        <span className="flex items-baseline gap-2">
-          <strong className="text-body-14-strong text-fg-primary">{charger.id}</strong>
-          <span className="text-caption-12 text-fg-secondary">{charger.speed} · {charger.power}</span>
-        </span>
-        <span className="truncate text-caption-12 text-fg-secondary">
-          {charger.pricePerKwh.toLocaleString('ko-KR')}원/kWh · {charger.note}
+        <strong className="text-body-14-strong text-fg-primary">충전기 {charger.id}</strong>
+        <span className="text-caption-12 text-fg-secondary">
+          {chargingType}{charger.maxPowerKw !== undefined ? ` · 최대 ${charger.maxPowerKw} kW` : ''}
         </span>
       </span>
-      {charger.status === 'available' ? (
-        <span className="flex shrink-0 items-center gap-1 text-label-12 text-success">
-          {selected && <Check className="size-3.5" aria-hidden />}
-          예약 가능
-        </span>
-      ) : (
-        <span className="shrink-0 text-caption-12 text-fg-tertiary">{unavailableLabels[charger.status]}</span>
-      )}
-    </button>
+      <span className={cn('shrink-0 text-label-12', isAvailable ? 'text-success' : 'text-fg-tertiary')}>
+        {statusLabels[charger.status]}
+      </span>
+    </article>
   )
 }

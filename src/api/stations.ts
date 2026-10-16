@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { getServerErrorMessage } from './errors'
-import type { ApiResponseDtoListStationMarkerResponse, ApiResponseDtoListStationSummaryResponse } from './generated/query'
-import type { StationListItem, StationMarker } from '@/types'
+import { ChargerResponseChargingType, ChargerResponseStatus } from './generated/query'
+import type { ApiResponseDtoListStationMarkerResponse, ApiResponseDtoListStationSummaryResponse, ApiResponseDtoStationDetailResponse } from './generated/query'
+import type { StationDetail, StationListItem, StationMarker } from '@/types'
 
 const stationFields = {
   stationId: z.number().int(),
@@ -26,6 +27,19 @@ const searchListSchema = z.array(z.object({
   rapidCount: optionalCount,
   slowCount: optionalCount,
 }))
+
+const stationDetailSchema = z.object({
+  ...stationFields,
+  address: z.string().nullish(),
+  rapidCount: optionalCount,
+  slowCount: optionalCount,
+  chargers: z.array(z.object({
+    chargerId: z.number().int(),
+    chargingType: z.enum(ChargerResponseChargingType).nullish(),
+    maxPowerKw: z.number().nonnegative().nullish(),
+    status: z.enum(ChargerResponseStatus).nullish(),
+  })).nullish(),
+})
 
 export function selectStationMarkers(response: ApiResponseDtoListStationMarkerResponse): StationMarker[] {
   if (response.success !== true) {
@@ -62,4 +76,28 @@ export function selectStationSearchResults(response: ApiResponseDtoListStationSu
     rapidCount: station.rapidCount ?? undefined,
     slowCount: station.slowCount ?? undefined,
   }))
+}
+
+export function selectStationDetail(response: ApiResponseDtoStationDetailResponse): StationDetail {
+  if (response.success !== true) {
+    throw new Error(getServerErrorMessage(response) ?? '충전소 정보를 불러오지 못했어요.')
+  }
+
+  const result = stationDetailSchema.safeParse(response.data)
+  if (!result.success) throw new Error('충전소 상세 응답을 확인할 수 없어요.')
+
+  const station = result.data
+  return {
+    id: station.stationId,
+    name: station.name,
+    address: station.address?.trim() || undefined,
+    rapidCount: station.rapidCount ?? undefined,
+    slowCount: station.slowCount ?? undefined,
+    chargers: (station.chargers ?? []).map((charger) => ({
+      id: charger.chargerId,
+      chargingType: charger.chargingType ?? undefined,
+      maxPowerKw: charger.maxPowerKw ?? undefined,
+      status: charger.status ?? 'UNKNOWN',
+    })),
+  }
 }
