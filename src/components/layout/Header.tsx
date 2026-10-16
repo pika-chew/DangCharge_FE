@@ -5,6 +5,7 @@ import { Button } from '@/components/ui'
 
 type HeaderProps = {
   mainPage?: boolean
+  showNavigation?: boolean
 }
 
 const navigation = [
@@ -14,7 +15,7 @@ const navigation = [
   { label: '회원가입', to: '/signup' },
 ]
 
-export function Header({ mainPage = false }: HeaderProps) {
+export function Header({ mainPage = false, showNavigation = true }: HeaderProps) {
   return (
     <header className="h-[75px] border-b border-[#ece8f1] bg-surface">
       <div className="mx-auto flex h-[74px] w-full max-w-[1180px] items-center justify-between px-6">
@@ -25,19 +26,21 @@ export function Header({ mainPage = false }: HeaderProps) {
           <span>당충전</span>
         </Link>
 
-        <nav aria-label="주요 메뉴">
-          {mainPage ? (
-            <Button asChild variant="outline" className="h-[42px] gap-2 rounded-full border-line bg-surface px-4 text-[13px] font-bold text-[#5f596b] hover:bg-[#f7f5fb]">
-              <Link to="/mypage"><img src={userIcon} alt="" />마이페이지</Link>
-            </Button>
-          ) : (
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              {navigation.map(({ label, to }) => (
-                <NavLink key={to} className="text-[#5f596b] no-underline aria-[current=page]:font-bold" to={to}>{label}</NavLink>
-              ))}
-            </div>
-          )}
-        </nav>
+        {(mainPage || showNavigation) && (
+          <nav aria-label="주요 메뉴">
+            {mainPage ? (
+              <Button asChild variant="outline" className="h-[42px] gap-2 rounded-full border-line bg-surface px-4 text-[13px] font-bold text-[#5f596b] hover:bg-[#f7f5fb]">
+                <Link to="/mypage"><img src={userIcon} alt="" />마이페이지</Link>
+              </Button>
+            ) : (
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                {navigation.map(({ label, to }) => (
+                  <NavLink key={to} className="text-[#5f596b] no-underline aria-[current=page]:font-bold" to={to}>{label}</NavLink>
+                ))}
+              </div>
+            )}
+          </nav>
+        )}
       </div>
     </header>
   )

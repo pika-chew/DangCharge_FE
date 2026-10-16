@@ -13,15 +13,24 @@ import {
 } from '@/pages'
 
 function PageLayout() {
-  const isHome = useLocation().pathname === '/'
+  const { pathname } = useLocation()
+  const isHome = pathname === '/'
 
   return (
     <>
-      <Header mainPage={isHome} />
-      <main className={isHome ? '' : 'mx-auto max-w-[960px] p-6'}>
+      <Header mainPage={isHome} showNavigation={pathname !== '/mypage'} />
+      <main>
         <Outlet />
       </main>
     </>
+  )
+}
+
+function PlaceholderLayout() {
+  return (
+    <div className="mx-auto max-w-[960px] p-6">
+      <Outlet />
+    </div>
   )
 }
 
@@ -30,14 +39,16 @@ export default function App() {
     <Routes>
       <Route element={<PageLayout />}>
         <Route index element={<MainPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="signup" element={<SignupPage />} />
         <Route path="mypage" element={<MyPage />} />
-        <Route path="history" element={<HistoryPage />} />
-        <Route path="stations/:stationId" element={<StationDetailPage />} />
-        <Route path="reservation/complete" element={<ReservationCompletePage />} />
-        <Route path="reservation/:chargerId" element={<ReservationPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route element={<PlaceholderLayout />}>
+          <Route path="login" element={<LoginPage />} />
+          <Route path="signup" element={<SignupPage />} />
+          <Route path="history" element={<HistoryPage />} />
+          <Route path="stations/:stationId" element={<StationDetailPage />} />
+          <Route path="reservation/complete" element={<ReservationCompletePage />} />
+          <Route path="reservation/:chargerId" element={<ReservationPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
       </Route>
     </Routes>
   )
