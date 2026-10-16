@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate, type Location } from 'react-router'
 import { z } from 'zod'
 import { demoLoginAccount } from '@/constants'
+import { useAuth } from '@/hooks/useAuth'
 
 const loginSchema = z.object({
   id: z.string().trim().min(1, '아이디를 입력해주세요.'),
@@ -11,8 +12,16 @@ const loginSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>
 
+function getRedirectPath(state: unknown) {
+  const from = (state as { from?: Location } | null)?.from
+
+  return from ? `${from.pathname}${from.search}${from.hash}` : '/'
+}
+
 export function useLoginForm() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { login } = useAuth()
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { id: '', password: '' },
@@ -24,7 +33,8 @@ export function useLoginForm() {
       return
     }
 
-    navigate('/')
+    login()
+    navigate(getRedirectPath(location.state), { replace: true })
   })
 
   return { form, onSubmit }

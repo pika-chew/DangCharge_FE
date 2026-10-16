@@ -1,5 +1,5 @@
 import { ArrowRight, CarFront, ChevronRight, Clock } from 'lucide-react'
-import { ChargeHistoryLink, SummaryCard } from '@/components/mypage'
+import { ChargeHistoryLink, LogoutButton, SummaryCard } from '@/components/mypage'
 import { sampleMyPage } from '@/constants'
 
 export function MyPage() {
@@ -32,6 +32,10 @@ export function MyPage() {
 
       <div className="mt-10">
         <ChargeHistoryLink count={chargeHistoryCount} />
+      </div>
+
+      <div className="mt-10">
+        <LogoutButton />
       </div>
     </div>
   )

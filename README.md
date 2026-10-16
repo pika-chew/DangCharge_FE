@@ -29,7 +29,7 @@ pnpm build
 | 충전기 예약 | `/reservation/:chargerId` |
 | 예약 완료 | `/reservation/complete` |
 
-`stationId`와 `chargerId`는 실제 데이터의 고유 ID를 넣습니다. 지금은 예약 화면이 `/reservation/complete?chargerId=&date=&time=` 쿼리로 완료 화면에 예약 정보를 넘기며, 예약 ID를 전달하는 방식은 백엔드 계약이 정해질 때 확정합니다. 모든 화면은 피그마 디자인과 예시 데이터로 구성되어 있으며, 실제 데이터와 인증·예약 처리는 API 연결 후 교체합니다. 데모 로그인 계정은 `src/constants/auth.ts`에 있습니다.
+`stationId`와 `chargerId`는 실제 데이터의 고유 ID를 넣습니다. 지금은 예약 화면이 `/reservation/complete?chargerId=&date=&time=` 쿼리로 완료 화면에 예약 정보를 넘기며, 예약 ID를 전달하는 방식은 백엔드 계약이 정해질 때 확정합니다. 모든 화면은 피그마 디자인과 예시 데이터로 구성되어 있으며, 실제 데이터와 인증·예약 처리는 API 연결 후 교체합니다. 로그인과 회원가입을 뺀 모든 화면은 로그인해야 들어갈 수 있으며, 데모 로그인 계정은 `src/constants/auth.ts`에 있습니다.
 
 ## 폴더 구조
 

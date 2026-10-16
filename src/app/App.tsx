@@ -1,4 +1,5 @@
 import { Outlet, Route, Routes, useLocation } from 'react-router'
+import { GuestOnly, RequireAuth } from '@/components/auth'
 import { Header } from '@/components/layout'
 import {
   HistoryPage,
@@ -36,18 +37,24 @@ function HeaderlessLayout() {
 export default function App() {
   return (
     <Routes>
-      <Route element={<HeaderlessLayout />}>
-        <Route path="login" element={<LoginPage />} />
-        <Route path="signup" element={<SignupPage />} />
-        <Route path="history" element={<HistoryPage />} />
-        <Route path="reservation/:chargerId" element={<ReservationPage />} />
-        <Route path="reservation/complete" element={<ReservationCompletePage />} />
+      <Route element={<GuestOnly />}>
+        <Route element={<HeaderlessLayout />}>
+          <Route path="login" element={<LoginPage />} />
+          <Route path="signup" element={<SignupPage />} />
+        </Route>
       </Route>
-      <Route element={<PageLayout />}>
-        <Route index element={<MainPage />} />
-        <Route path="mypage" element={<MyPage />} />
-        <Route path="stations/:stationId" element={<StationDetailPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<HeaderlessLayout />}>
+          <Route path="history" element={<HistoryPage />} />
+          <Route path="reservation/:chargerId" element={<ReservationPage />} />
+          <Route path="reservation/complete" element={<ReservationCompletePage />} />
+        </Route>
+        <Route element={<PageLayout />}>
+          <Route index element={<MainPage />} />
+          <Route path="mypage" element={<MyPage />} />
+          <Route path="stations/:stationId" element={<StationDetailPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
       </Route>
     </Routes>
   )
