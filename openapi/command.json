@@ -1,0 +1,1568 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DangCharge API",
+    "description": "DangCharge 서비스 API 문서",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "https://api.dangcharge.cloud/command",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "user",
+      "description": "[마이페이지] 내 정보"
+    },
+    {
+      "name": "admin",
+      "description": "[관리] 내부·관리용 API. X-Admin-Key 헤더가 필요하다"
+    },
+    {
+      "name": "vehicle",
+      "description": "[차종] 차종 목록"
+    },
+    {
+      "name": "reservation",
+      "description": "[예약] 충전구 예약. 모든 API가 로그인을 요구한다"
+    },
+    {
+      "name": "charging",
+      "description": "[충전] 충전 종료·충전 내역"
+    },
+    {
+      "name": "station",
+      "description": "[충전소] 충전소 조회·검색"
+    },
+    {
+      "name": "auth",
+      "description": "[인증] 회원가입·로그인·토큰"
+    }
+  ],
+  "paths": {
+    "/api/v1/reservations": {
+      "post": {
+        "tags": [
+          "reservation"
+        ],
+        "summary": "예약 생성",
+        "description": "사용자는 진행 중인 예약(예약·충전중)을 하나만 가질 수 있다. 이미 진행 중인 예약(예약, 충전중)이 있으면 새 예약을 만들지 않는다. 모든 예약은 1시간이다. 시작 시각만 보내면 종료 시각은 1시간 뒤로 정해진다. 시작은 정각 또는 30분, 오늘부터 7일 이내다. Idempotency-Key 헤더를 보내면 같은 키의 재요청에는 처음 만든 예약을 돌려준다.",
+        "operationId": "createReservation",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReservationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoReservationDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reservations/{reservationId}/check-in": {
+      "post": {
+        "tags": [
+          "reservation"
+        ],
+        "summary": "충전 시작",
+        "description": "예약(CONFIRMED)을 충전중(CHARGING)으로 바꾼다. 예약 시작 10분 전부터 시작 15분 후까지만 할 수 있다.",
+        "operationId": "checkIn",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoReservationDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/charging/{reservationId}/stop": {
+      "post": {
+        "tags": [
+          "charging"
+        ],
+        "summary": "충전 종료",
+        "description": "충전중(CHARGING)인 예약을 완료(COMPLETED)로 바꾼다. 로그인이 필요하다.",
+        "operationId": "stopCharging",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/signup": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "회원가입",
+        "description": "비밀번호는 8~64자이며 영문과 숫자를 모두 포함해야 한다.",
+        "operationId": "signup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoVoid"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "access 토큰 재발급",
+        "operationId": "refresh",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoAccessTokenResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "로그아웃",
+        "description": "refresh 토큰을 폐기하고 지금 쓰던 access 토큰을 막는다. 본문은 보내지 않아도 된다.",
+        "operationId": "logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "로그인",
+        "description": "access/refresh 토큰을 발급한다.",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoTokenResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/stations/sync": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "충전소 데이터 동기화",
+        "description": "외부 충전소 설치현황을 DB로 동기화한다. 스케줄러 배치와 같은 UseCase를 쓴다.",
+        "operationId": "syncStations",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoStationSyncResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "adminKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "내 정보 조회",
+        "description": "로그인이 필요하다.",
+        "operationId": "getMe",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoUserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "user"
+        ],
+        "summary": "내 정보 수정",
+        "description": "바꿀 값만 보낸다. 진행 중인 예약이 있으면 차종은 바꿀 수 없다. 로그인이 필요하다.",
+        "operationId": "updateMe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vehicle-models": {
+      "get": {
+        "tags": [
+          "vehicle"
+        ],
+        "summary": "차종 목록",
+        "operationId": "getVehicleModels",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoListVehicleModelResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/stations": {
+      "get": {
+        "tags": [
+          "station"
+        ],
+        "summary": "지도 반경 내 충전소 목록",
+        "description": "마커용 가벼운 응답. radius는 미터 단위이고 최대 20km, 가까운 순으로 최대 200건이다. 좌표가 없는 충전소는 나오지 않는다.",
+        "operationId": "getStationsInRadius",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "minKw",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "availableOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoListStationMarkerResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/stations/{stationId}": {
+      "get": {
+        "tags": [
+          "station"
+        ],
+        "summary": "충전소 상세",
+        "description": "충전소 정보와 소속 충전기 전체(타입·출력·상태)를 함께 내려준다.",
+        "operationId": "getStation",
+        "parameters": [
+          {
+            "name": "stationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoStationDetailResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/stations/{stationId}/chargers": {
+      "get": {
+        "tags": [
+          "station"
+        ],
+        "summary": "충전기별 타입·출력(kW)·현재 상태",
+        "operationId": "getChargers",
+        "parameters": [
+          {
+            "name": "stationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoListChargerResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/stations/{stationId}/availability": {
+      "get": {
+        "tags": [
+          "station"
+        ],
+        "summary": "날짜별 예약 가능 시간 슬롯",
+        "description": "충전기별로 예약할 수 있는 1시간 구간을 30분 간격 시작 시각으로 내려준다. 내 차종을 지원하지 않는 충전소면 빈 목록이다. 로그인이 필요하다.",
+        "operationId": "getAvailability",
+        "parameters": [
+          {
+            "name": "stationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoListAvailableSlotResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stations/search": {
+      "get": {
+        "tags": [
+          "station"
+        ],
+        "summary": "주소/이름 검색",
+        "description": "시도(metro)와 시군구(city)로 범위를 좁힐 수 있다. 시도는 \"서울\", \"서울시\"처럼 줄여 써도 된다. 시군구는 \"강남구\"처럼 정식 이름으로 넣는다. 세 조건 중 하나 이상이 필요하고 최대 50건이다.",
+        "operationId": "searchStations",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "충전소 이름·주소에 들어간 글자",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "강남구청"
+          },
+          {
+            "name": "metro",
+            "in": "query",
+            "description": "시도. 줄여 써도 된다",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "서울특별시"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "시군구",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "강남구"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoListStationSummaryResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/reservations/{reservationId}": {
+      "get": {
+        "tags": [
+          "reservation"
+        ],
+        "summary": "예약 상세확인하기",
+        "description": "예약 번호, 시간, 충전소, 예약 상태를 확인한다. 취소·완료된 예약도 내 예약이면 조회된다.",
+        "operationId": "getReservation",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoReservationDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "reservation"
+        ],
+        "summary": "예약 취소",
+        "description": "충전을 시작하기 전, 예약 시작 10분 전까지만 취소할 수 있다.",
+        "operationId": "cancelReservation",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reservations/me": {
+      "get": {
+        "tags": [
+          "reservation"
+        ],
+        "summary": "내 예약 확인하기",
+        "description": "진행 중인 내 예약을 확인한다. 사용자당 진행 중인 예약은 하나라 ID 없이 조회한다. state는 NONE(예약 없음), RESERVED(예약됨), CHARGING(충전중)이고 message는 화면에 띄울 문구다. 예약이 없어도 오류가 아니라 200이며 reservation이 null이다.",
+        "operationId": "getMyReservation",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoMyReservationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/charging/history": {
+      "get": {
+        "tags": [
+          "charging"
+        ],
+        "summary": "충전 내역 목록",
+        "description": "기간 조건 없이 전체 내역을 최근 완료 순으로 페이지 단위로 조회한다. 로그인이 필요하다.",
+        "operationId": "getHistory",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoPagedResponseChargingHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/charging/history/{reservationId}": {
+      "get": {
+        "tags": [
+          "charging"
+        ],
+        "summary": "충전 내역 상세",
+        "description": "로그인이 필요하다.",
+        "operationId": "getHistoryDetail",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDtoChargingHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateReservationRequest": {
+        "type": "object",
+        "properties": {
+          "chargerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "chargerId",
+          "startAt"
+        ]
+      },
+      "ApiResponseDtoReservationDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReservationDetailResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationDetailResponse": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reservationNumber": {
+            "type": "string"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stationName": {
+            "type": "string"
+          },
+          "stationAddress": {
+            "type": "string"
+          },
+          "chargerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "CHARGING",
+              "CANCELLED",
+              "COMPLETED",
+              "NO_SHOW"
+            ]
+          }
+        }
+      },
+      "ApiResponseDtoVoid": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {},
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "SignupRequest": {
+        "type": "object",
+        "properties": {
+          "loginId": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 4,
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 0
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          },
+          "vehicleModel": {
+            "type": "string",
+            "enum": [
+              "SM3_ZE",
+              "RAY_EV",
+              "SOUL_EV",
+              "NISSAN_LEAF",
+              "IONIQ_EV",
+              "BMW_I3",
+              "SPARK_EV",
+              "BOLT_EV",
+              "TESLA"
+            ]
+          }
+        },
+        "required": [
+          "loginId",
+          "password",
+          "username",
+          "vehicleModel"
+        ]
+      },
+      "RefreshTokenRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "AccessTokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseDtoAccessTokenResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AccessTokenResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "loginId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "loginId",
+          "password"
+        ]
+      },
+      "ApiResponseDtoTokenResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TokenResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseDtoStationSyncResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/StationSyncResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "StationSyncResponse": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "pattern": ".*\\S.*"
+          },
+          "vehicleModel": {
+            "type": "string",
+            "enum": [
+              "SM3_ZE",
+              "RAY_EV",
+              "SOUL_EV",
+              "NISSAN_LEAF",
+              "IONIQ_EV",
+              "BMW_I3",
+              "SPARK_EV",
+              "BOLT_EV",
+              "TESLA"
+            ]
+          }
+        }
+      },
+      "ApiResponseDtoUserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "loginId": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "vehicleModel": {
+            "type": "string",
+            "enum": [
+              "SM3_ZE",
+              "RAY_EV",
+              "SOUL_EV",
+              "NISSAN_LEAF",
+              "IONIQ_EV",
+              "BMW_I3",
+              "SPARK_EV",
+              "BOLT_EV",
+              "TESLA"
+            ]
+          }
+        }
+      },
+      "ApiResponseDtoListVehicleModelResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleModelResponse"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "VehicleModelResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "SM3_ZE",
+              "RAY_EV",
+              "SOUL_EV",
+              "NISSAN_LEAF",
+              "IONIQ_EV",
+              "BMW_I3",
+              "SPARK_EV",
+              "BOLT_EV",
+              "TESLA"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseDtoListStationMarkerResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StationMarkerResponse"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "StationMarkerResponse": {
+        "type": "object",
+        "properties": {
+          "stationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "availableChargerCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distanceMeters": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiResponseDtoStationDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/StationDetailResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "ChargerResponse": {
+        "type": "object",
+        "properties": {
+          "chargerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "chargingType": {
+            "type": "string",
+            "enum": [
+              "FAST",
+              "SLOW"
+            ]
+          },
+          "maxPowerKw": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "IN_USE",
+              "OUT_OF_SERVICE",
+              "UNKNOWN"
+            ]
+          }
+        }
+      },
+      "StationDetailResponse": {
+        "type": "object",
+        "properties": {
+          "stationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "metro": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "rapidCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "supportedModels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SM3_ZE",
+                "RAY_EV",
+                "SOUL_EV",
+                "NISSAN_LEAF",
+                "IONIQ_EV",
+                "BMW_I3",
+                "SPARK_EV",
+                "BOLT_EV",
+                "TESLA"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "chargers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargerResponse"
+            }
+          }
+        }
+      },
+      "ApiResponseDtoListChargerResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargerResponse"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "ApiResponseDtoListAvailableSlotResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailableSlotResponse"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "AvailableSlotResponse": {
+        "type": "object",
+        "properties": {
+          "chargerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseDtoListStationSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StationSummaryResponse"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "StationSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "stationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "metro": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "rapidCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "supportedModels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SM3_ZE",
+                "RAY_EV",
+                "SOUL_EV",
+                "NISSAN_LEAF",
+                "IONIQ_EV",
+                "BMW_I3",
+                "SPARK_EV",
+                "BOLT_EV",
+                "TESLA"
+              ]
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "ApiResponseDtoMyReservationResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MyReservationResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "MyReservationResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "RESERVED",
+              "CHARGING"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "reservation": {
+            "$ref": "#/components/schemas/Summary"
+          }
+        }
+      },
+      "Summary": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stationName": {
+            "type": "string"
+          },
+          "stationAddress": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseDtoPagedResponseChargingHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PagedResponseChargingHistoryResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      },
+      "ChargingHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stationName": {
+            "type": "string"
+          },
+          "stationAddress": {
+            "type": "string"
+          },
+          "vehicleModel": {
+            "type": "string",
+            "enum": [
+              "SM3_ZE",
+              "RAY_EV",
+              "SOUL_EV",
+              "NISSAN_LEAF",
+              "IONIQ_EV",
+              "BMW_I3",
+              "SPARK_EV",
+              "BOLT_EV",
+              "TESLA"
+            ]
+          },
+          "reservedStartAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reservedEndAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "chargingStartedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PagedResponseChargingHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargingHistoryResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiResponseDtoChargingHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ChargingHistoryResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "adminKey": {
+        "type": "apiKey",
+        "name": "X-Admin-Key",
+        "in": "header"
+      }
+    }
+  }
+}

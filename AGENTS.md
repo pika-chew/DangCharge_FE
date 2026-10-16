@@ -9,7 +9,7 @@
 - pnpm, ESLint, Tailwind CSS 4, shadcn/ui, lucide-react 아이콘
 - 폼은 React Hook Form과 Zod(`@hookform/resolvers/zod`)로 입력값을 검증합니다. 스키마는 해당 폼 훅(`useLoginForm`, `useSignupForm`)에 둡니다.
 - `src/index.css`는 Tailwind 진입점과 전역 디자인 토큰·기본 스타일입니다. 화면별 CSS 파일은 만들지 않습니다.
-- 백엔드 연동 시 서버 상태는 TanStack Query, HTTP 요청은 Axios를 사용합니다. API 계약 전까지 두 라이브러리를 미리 설치하거나 가짜 요청 계층을 만들지 않습니다. 선택·입력처럼 화면 안에서만 쓰는 상태는 React 상태나 훅으로 다룹니다.
+- 백엔드 연동 시 서버 상태는 TanStack Query, HTTP 요청은 Axios를 사용하고 Orval로 요청 함수·타입·훅을 생성합니다. 선택·입력처럼 화면 안에서만 쓰는 상태는 React 상태나 훅으로 다룹니다.
 
 ## 명령어
 
@@ -18,7 +18,11 @@ pnpm install  # 의존성 설치
 pnpm dev      # 개발 서버
 pnpm lint     # ESLint 검사
 pnpm build    # TypeScript 검사와 배포용 빌드
+pnpm api:generate # 저장된 OpenAPI 명세로 코드 생성
+pnpm api:sync     # 서버 명세 갱신 후 코드 생성
 ```
+
+Orval 설정은 `orval.config.ts`, 원본 명세는 `openapi/`, 생성 결과는 `src/api/generated/`에 둡니다. GET은 query, POST·PATCH·DELETE는 command만 사용하며 command의 테스트용 GET은 생성하지 않습니다. 생성 파일은 직접 수정하지 않고 명세와 함께 커밋합니다. 생성 파일 내부의 상대 import는 Orval이 관리합니다. 공통 Axios 설정은 `src/api/client/`에서 관리하고 외부에서는 `@/api` barrel을 사용합니다. 화면·인증 연동은 아직 데모 상태입니다.
 
 `package.json`의 의존성을 바꿀 때는 pnpm을 사용하고 `pnpm-lock.yaml`도 함께 갱신합니다. shadcn/ui 컴포넌트는 `pnpm exec shadcn add <이름>`으로 추가하고, 기존 `src/components/ui` 파일을 덮어쓰지 않습니다. 코드 변경 후 `pnpm lint`와 `pnpm build`를 실행합니다.
 

@@ -16,6 +16,27 @@ pnpm lint
 pnpm build
 ```
 
+## API 코드 생성
+
+Orval로 OpenAPI 명세에서 Axios 요청 함수, TypeScript 타입, TanStack Query 훅을 생성합니다.
+
+```bash
+pnpm api:generate # 저장된 명세로 생성, 네트워크 불필요
+pnpm api:sync     # 서버의 두 명세를 내려받고 다시 생성
+```
+
+Orval 8은 Node.js 22.18 이상이 필요합니다. 생성한 파일과 명세는 함께 커밋합니다.
+
+- `orval.config.ts`: query는 GET만, command는 POST·PATCH·DELETE만 생성합니다. command의 테스트용 GET은 제외합니다.
+- `openapi/query.json`, `openapi/command.json`: 서버에서 내려받은 원본 명세입니다.
+- `src/api/generated/query.ts`, `src/api/generated/command.ts`: 생성 결과입니다. 직접 수정하지 않고 명세 갱신 후 다시 생성합니다. 생성 파일 내부의 상대 import는 Orval이 관리합니다.
+- `src/api/client`: 서비스별 Axios 기본 주소와 응답 본문 반환을 담당합니다. `{ success, data, error }` 응답 구조는 그대로 유지합니다.
+- 외부에서는 `import { queryApi, commandApi } from '@/api'`로 사용합니다.
+
+명세 주소는 `https://api.dangcharge.cloud/query/v3/api-docs`와 `https://api.dangcharge.cloud/command/v3/api-docs`입니다. 실행 시 API 주소는 `.env.example`을 참고해 `.env.local`에서 바꿀 수 있습니다. 주소에는 `/query` 또는 `/command`까지 포함합니다.
+
+현재는 생성 기반만 준비했습니다. 화면은 데모 상태이며, 인증 토큰 저장·첨부·재발급과 `QueryClientProvider` 연결은 실제 화면 연동 단계에서 추가합니다. 생성된 Query 훅을 사용하려면 먼저 `QueryClientProvider`가 필요합니다.
+
 ## 화면 경로
 
 | 화면 | 경로 |
@@ -40,4 +61,4 @@ pnpm build
 - `src/lib`: shadcn/ui 유틸리티와 날짜 유틸리티
 - `src/index.css`: Tailwind 진입점과 전역 디자인 토큰
 
-프로젝트 내부 import는 `@/` 절대경로와 폴더별 `index.ts` barrel을 사용합니다. 백엔드 연동 시 서버 상태는 TanStack Query, HTTP 요청은 Axios를 사용할 예정입니다.
+프로젝트 내부 import는 `@/` 절대경로와 폴더별 `index.ts` barrel을 사용합니다. 백엔드 연동은 TanStack Query, Axios, Orval을 사용합니다.
