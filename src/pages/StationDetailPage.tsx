@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { isAxiosError } from 'axios'
 import { useParams } from 'react-router'
 import { getApiErrorMessage, queryApi, selectStationDetail } from '@/api'
@@ -11,6 +12,9 @@ export function StationDetailPage() {
   const stationQuery = queryApi.useGetStation(stationId, {
     query: { enabled: validStationId, select: selectStationDetail, retry: false },
   })
+  const [selectedChargerId, setSelectedChargerId] = useState<number | null>(null)
+  const reservableChargers = stationQuery.data?.chargers.filter(({ status }) => status !== 'OUT_OF_SERVICE') ?? []
+  const selectedCharger = reservableChargers.find(({ id }) => id === selectedChargerId) ?? reservableChargers[0]
 
   let errorMessage = '충전소 정보를 찾을 수 없어요.'
   if (isAxiosError(stationQuery.error)) {
@@ -27,8 +31,12 @@ export function StationDetailPage() {
       {stationQuery.data ? (
         <article className="mt-8 grid gap-10 rounded-26 border border-line bg-surface p-8 shadow-card">
           <StationSummary station={stationQuery.data} />
-          <ChargerList chargers={stationQuery.data.chargers} />
-          <ReserveAction />
+          <ChargerList
+            chargers={stationQuery.data.chargers}
+            selectedChargerId={selectedCharger?.id}
+            onSelectCharger={setSelectedChargerId}
+          />
+          <ReserveAction stationId={stationQuery.data.id} chargerId={selectedCharger?.id} />
         </article>
       ) : !validStationId ? (
         <p className="mt-8 text-body-14 text-fg-secondary">충전소 정보를 찾을 수 없어요.</p>

@@ -1,7 +1,6 @@
 export { useStationSearch } from '@/hooks/useStationSearch'
 export { useDeviceLocation } from '@/hooks/useDeviceLocation'
 export { useReservationSelection } from '@/hooks/useReservationSelection'
-export { useChargingCompletion } from '@/hooks/useChargingCompletion'
 export { useLoginForm, type LoginFormValues } from '@/hooks/useLoginForm'
 export { useSignupForm, type SignupFormValues } from '@/hooks/useSignupForm'
 export { useVehicleModels } from '@/hooks/useVehicleModels'

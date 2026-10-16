@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { getServerErrorMessage } from './errors'
-import { ChargerResponseChargingType, ChargerResponseStatus } from './generated/query'
-import type { ApiResponseDtoListStationMarkerResponse, ApiResponseDtoListStationSummaryResponse, ApiResponseDtoStationDetailResponse } from './generated/query'
-import type { StationDetail, StationListItem, StationMarker } from '@/types'
+import { AvailableSlotResponseStatus, ChargerResponseChargingType, ChargerResponseStatus } from './generated/query'
+import type { ApiResponseDtoListAvailableSlotResponse, ApiResponseDtoListStationMarkerResponse, ApiResponseDtoListStationSummaryResponse, ApiResponseDtoStationDetailResponse } from './generated/query'
+import type { ReservationSlot, StationDetail, StationListItem, StationMarker } from '@/types'
 
 const stationFields = {
   stationId: z.number().int(),
@@ -40,6 +40,13 @@ const stationDetailSchema = z.object({
     status: z.enum(ChargerResponseStatus).nullish(),
   })).nullish(),
 })
+
+const availabilitySchema = z.array(z.object({
+  chargerId: z.number().int(),
+  startAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
+  endAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
+  status: z.enum(AvailableSlotResponseStatus),
+}))
 
 export function selectStationMarkers(response: ApiResponseDtoListStationMarkerResponse): StationMarker[] {
   if (response.success !== true) {
@@ -100,4 +107,14 @@ export function selectStationDetail(response: ApiResponseDtoStationDetailRespons
       status: charger.status ?? 'UNKNOWN',
     })),
   }
+}
+
+export function selectAvailability(response: ApiResponseDtoListAvailableSlotResponse): ReservationSlot[] {
+  if (response.success !== true) {
+    throw new Error(getServerErrorMessage(response) ?? '예약 가능 시간을 불러오지 못했어요.')
+  }
+
+  const result = availabilitySchema.safeParse(response.data)
+  if (!result.success) throw new Error('예약 가능 시간 응답을 확인할 수 없어요.')
+  return result.data
 }

@@ -1,4 +1,5 @@
 export * as queryApi from './generated/query'
 export * as commandApi from './generated/command'
 export { getApiErrorMessage, getServerErrorMessage } from './errors'
-export { selectStationDetail, selectStationMarkers, selectStationSearchResults } from './stations'
+export { selectAvailability, selectStationDetail, selectStationMarkers, selectStationSearchResults } from './stations'
+export { selectReservationDetail } from './reservations'

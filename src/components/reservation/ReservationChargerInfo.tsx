@@ -1,9 +1,9 @@
 import { Zap } from 'lucide-react'
-import type { SampleCharger } from '@/types'
+import type { StationCharger } from '@/types'
 
 type ReservationChargerInfoProps = {
   stationName: string
-  charger: SampleCharger
+  charger: StationCharger
 }
 
 export function ReservationChargerInfo({ stationName, charger }: ReservationChargerInfoProps) {
@@ -15,7 +15,8 @@ export function ReservationChargerInfo({ stationName, charger }: ReservationChar
       <div className="min-w-0">
         <h2 className="truncate text-body-14-strong text-fg-primary">{stationName}</h2>
         <p className="mt-1 text-caption-12 text-fg-secondary">
-          {charger.id} · {charger.power} · {charger.pricePerKwh.toLocaleString('ko-KR')}원/kWh
+          충전기 {charger.id} · {charger.chargingType === 'FAST' ? '급속' : charger.chargingType === 'SLOW' ? '완속' : '종류 확인 중'}
+          {charger.maxPowerKw !== undefined ? ` · 최대 ${charger.maxPowerKw} kW` : ''}
         </p>
       </div>
     </div>

@@ -4,6 +4,8 @@ import type { StationCharger } from '@/types'
 
 type ChargerOptionProps = {
   charger: StationCharger
+  selected: boolean
+  onSelect: () => void
 }
 
 const statusLabels: Record<StationCharger['status'], string> = {
@@ -13,13 +15,24 @@ const statusLabels: Record<StationCharger['status'], string> = {
   UNKNOWN: '상태 확인 중',
 }
 
-export function ChargerOption({ charger }: ChargerOptionProps) {
+export function ChargerOption({ charger, selected, onSelect }: ChargerOptionProps) {
   const isAvailable = charger.status === 'AVAILABLE'
+  const selectable = charger.status !== 'OUT_OF_SERVICE'
   const chargingType = charger.chargingType === 'FAST' ? '급속'
     : charger.chargingType === 'SLOW' ? '완속' : '종류 확인 중'
 
   return (
-    <article className="flex w-full items-center gap-3 rounded-18 border border-line bg-surface p-4">
+    <button
+      className={cn(
+        'flex w-full items-center gap-3 rounded-18 border p-4 text-left',
+        selected ? 'border-brand bg-brand-subtle/50 ring-3 ring-brand/10' : 'border-line bg-surface',
+        selectable ? 'cursor-pointer hover:border-brand' : 'cursor-not-allowed opacity-50',
+      )}
+      type="button"
+      disabled={!selectable}
+      aria-pressed={selected}
+      onClick={onSelect}
+    >
       <span
         className={cn(
           'grid size-9 shrink-0 place-items-center rounded-14',
@@ -37,6 +50,6 @@ export function ChargerOption({ charger }: ChargerOptionProps) {
       <span className={cn('shrink-0 text-label-12', isAvailable ? 'text-success' : 'text-fg-tertiary')}>
         {statusLabels[charger.status]}
       </span>
-    </article>
+    </button>
   )
 }
