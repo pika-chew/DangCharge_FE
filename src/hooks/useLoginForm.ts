@@ -1,8 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { isAxiosError } from 'axios'
+import { useRef, type FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
-import { useLocation, useNavigate, type Location } from 'react-router'
 import { z } from 'zod'
-import { demoLoginAccount } from '@/constants'
+import { commandApi } from '@/api'
+import { isAuthTokens } from '@/lib/auth'
 import { useAuth } from '@/hooks/useAuth'
 
 const loginSchema = z.object({
@@ -12,30 +14,61 @@ const loginSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>
 
-function getRedirectPath(state: unknown) {
-  const from = (state as { from?: Location } | null)?.from
+const errorResponseSchema = z.object({
+  error: z.object({ message: z.string().trim().min(1) }),
+})
 
-  return from ? `${from.pathname}${from.search}${from.hash}` : '/'
+function getServerErrorMessage(data: unknown) {
+  const result = errorResponseSchema.safeParse(data)
+  return result.success ? result.data.error.message : undefined
+}
+
+function getLoginErrorMessage(error: unknown) {
+  if (isAxiosError(error)) {
+    if (!error.response) return '서버에 연결할 수 없어요. 잠시 후 다시 시도해주세요.'
+    if (error.response.status < 500) {
+      return getServerErrorMessage(error.response.data)
+        ?? '아이디 또는 비밀번호가 올바르지 않아요.'
+    }
+  }
+
+  return '로그인 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.'
 }
 
 export function useLoginForm() {
-  const navigate = useNavigate()
-  const location = useLocation()
   const { login } = useAuth()
+  const { mutateAsync } = commandApi.useLogin({ mutation: { retry: false } })
+  const submissionInFlight = useRef(false)
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { id: '', password: '' },
   })
 
-  const onSubmit = form.handleSubmit(({ id, password }) => {
-    if (id !== demoLoginAccount.id || password !== demoLoginAccount.password) {
-      form.setError('root', { message: '아이디 또는 비밀번호가 올바르지 않아요.' })
-      return
-    }
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (submissionInFlight.current) return
+    submissionInFlight.current = true
 
-    login()
-    navigate(getRedirectPath(location.state), { replace: true })
-  })
+    try {
+      await form.handleSubmit(async ({ id, password }) => {
+        try {
+          const response = await mutateAsync({ data: { loginId: id, password } })
+          if (response.success !== true || !isAuthTokens(response.data)) {
+            form.setError('root', {
+              message: getServerErrorMessage(response) ?? '로그인 응답을 확인할 수 없어요. 다시 시도해주세요.',
+            })
+            return
+          }
+
+          login(response.data)
+        } catch (error) {
+          form.setError('root', { message: getLoginErrorMessage(error) })
+        }
+      })(event)
+    } finally {
+      submissionInFlight.current = false
+    }
+  }
 
   return { form, onSubmit }
 }

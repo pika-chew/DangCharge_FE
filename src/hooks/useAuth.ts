@@ -1,8 +1,9 @@
 import { createContext, useContext } from 'react'
+import type { AuthTokens } from '@/lib/auth'
 
 export type AuthContextValue = {
   isLoggedIn: boolean
-  login: () => void
+  login: (tokens: AuthTokens) => void
   logout: () => void
 }
 

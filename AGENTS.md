@@ -1,6 +1,6 @@
 # 당충전 프론트엔드
 
-국내 충전소를 찾고 충전기를 예약하는 웹 앱입니다. 모든 화면이 피그마 디자인과 예시 데이터로 구현되어 있으며, 인증·예약 API와 충전소 데이터 계약은 확정되지 않았습니다.
+국내 충전소를 찾고 충전기를 예약하는 웹 앱입니다. 화면은 피그마 디자인을 기준으로 구현되어 있습니다. 로그인은 실제 API에 연결되어 있고, 나머지 화면은 아직 예시 데이터와 데모 동작을 사용합니다. API 계약은 `openapi/`의 명세를 기준으로 확인합니다.
 
 ## 기술 스택
 
@@ -18,18 +18,20 @@ pnpm install  # 의존성 설치
 pnpm dev      # 개발 서버
 pnpm lint     # ESLint 검사
 pnpm build    # TypeScript 검사와 배포용 빌드
+pnpm test     # 로그인·인증 세션 테스트
 pnpm api:generate # 저장된 OpenAPI 명세로 코드 생성
 pnpm api:sync     # 서버 명세 갱신 후 코드 생성
 ```
 
-Orval 설정은 `orval.config.ts`, 원본 명세는 `openapi/`, 생성 결과는 `src/api/generated/`에 둡니다. GET은 query, POST·PATCH·DELETE는 command만 사용하며 command의 테스트용 GET은 생성하지 않습니다. 생성 파일은 직접 수정하지 않고 명세와 함께 커밋합니다. 생성 파일 내부의 상대 import는 Orval이 관리합니다. 공통 Axios 설정은 `src/api/client/`에서 관리하고 외부에서는 `@/api` barrel을 사용합니다. 화면·인증 연동은 아직 데모 상태입니다.
+Orval 설정은 `orval.config.ts`, 원본 명세는 `openapi/`, 생성 결과는 `src/api/generated/`에 둡니다. GET은 query, POST·PATCH·DELETE는 command만 사용하며 command의 테스트용 GET은 생성하지 않습니다. 생성 파일은 직접 수정하지 않고 명세와 함께 커밋합니다. 생성 파일 내부의 상대 import는 Orval이 관리합니다. 공통 Axios 설정은 `src/api/client/`에서 관리하고 외부에서는 `@/api` barrel을 사용합니다. 로그인은 실제 API를 사용하며, 인증 토큰은 `src/lib/auth/`에서 관리합니다. 토큰 자동 재발급과 서버 로그아웃은 아직 연결하지 않았습니다.
 
-`package.json`의 의존성을 바꿀 때는 pnpm을 사용하고 `pnpm-lock.yaml`도 함께 갱신합니다. shadcn/ui 컴포넌트는 `pnpm exec shadcn add <이름>`으로 추가하고, 기존 `src/components/ui` 파일을 덮어쓰지 않습니다. 코드 변경 후 `pnpm lint`와 `pnpm build`를 실행합니다.
+`package.json`의 의존성을 바꿀 때는 pnpm을 사용하고 `pnpm-lock.yaml`도 함께 갱신합니다. shadcn/ui 컴포넌트는 `pnpm exec shadcn add <이름>`으로 추가하고, 기존 `src/components/ui` 파일을 덮어쓰지 않습니다. API 연동 작업 중에는 테스트·lint·build를 사용자가 직접 수행하므로 에이전트는 실행하지 않습니다. 그 외 코드 변경 후에는 `pnpm lint`와 `pnpm build`를 실행합니다.
 
 ## 폴더 구조
 
 ```text
 src/
+├── api/                 # Orval 생성 코드와 공통 Axios 설정
 ├── app/
 │   └── App.tsx          # 라우트 정의와 공통 레이아웃
 ├── assets/              # 피그마에서 받은 정적 이미지·아이콘
@@ -43,7 +45,7 @@ src/
 │   ├── reservation/     # 예약 날짜·시간 선택, 예약 확정, 예약 완료
 │   ├── station/         # 충전소 상세 요약, 충전기 선택
 │   └── ui/              # shadcn/ui 기반 공통 컴포넌트
-├── constants/           # 디자인 토큰, 화면 예시 데이터, 데모 계정
+├── constants/           # 디자인 토큰, 화면 예시 데이터
 ├── hooks/               # 화면 동작과 폼을 묶는 훅
 ├── lib/                 # shadcn/ui 유틸리티(utils.ts), 날짜 유틸리티(date.ts)
 ├── pages/               # 경로별 얇은 페이지 컴포넌트
@@ -103,7 +105,7 @@ src/
 
 헤더가 있는 화면은 `PageLayout`, 없는 화면은 `HeaderlessLayout` 아래에 둡니다.
 
-로그인과 회원가입은 `GuestOnly` 아래에 두어 로그인한 사용자는 메인으로 보냅니다. 나머지 화면과 없는 경로(`*`)는 `RequireAuth` 아래에 두어, 로그인하지 않은 사용자는 로그인 화면으로 보내고 로그인 후 원래 가려던 주소로 돌려보냅니다. 로그인한 사용자가 없는 경로에 들어오면 `NotFoundPage`를 보여줍니다. 새 화면을 추가할 때도 이 두 가드 중 하나 아래에 둡니다. 이 가드는 화면 이동만 막으며, 실제 접근 제어는 백엔드 인증이 맡습니다.
+로그인과 회원가입은 `GuestOnly` 아래에 두어 로그인한 사용자는 항상 메인(`/`)으로 보냅니다. 나머지 화면과 없는 경로(`*`)는 `RequireAuth` 아래에 두어, 로그인하지 않은 사용자는 로그인 화면으로 보냅니다. 로그인 후에도 이전 경로로 복귀하지 않고 항상 메인으로 이동합니다. 로그인한 사용자가 없는 경로에 들어오면 `NotFoundPage`를 보여줍니다. 새 화면을 추가할 때도 이 두 가드 중 하나 아래에 둡니다. 이 가드는 화면 이동만 막으며, 실제 접근 제어는 백엔드 인증이 맡습니다.
 
 고유 ID는 경로 매개변수로, 검색·필터 같은 선택 상태는 쿼리 매개변수로 표현합니다. `/reservation/complete`는 완료 화면으로 예약하며 `complete`를 충전기 ID로 사용하지 않습니다. 지금은 예약 화면이 `?chargerId=&date=YYYY-MM-DD&time=HH:mm` 쿼리로 완료 화면에 예약 정보를 넘깁니다.
 
@@ -113,10 +115,10 @@ src/
 - 예약 가능 여부와 예약 성공 여부는 백엔드 응답을 기준으로 구현합니다.
 - 화면의 충전소·충전기·예약 시간·차종·충전 내역·마이페이지 정보는 `src/constants`의 예시 데이터입니다. API 계약 후 응답으로 교체합니다.
 - 아래 동작은 API 연결 전 데모용이며, 코드에 같은 내용의 주석이 있습니다. API를 연결할 때 백엔드 응답 기준으로 바꿉니다.
-  - 로그인: `src/constants/auth.ts`의 데모 계정(`test` / `1234`)일 때만 로그인됩니다. 로그인 상태는 `AuthProvider`(`src/components/auth`)가 `sessionStorage`에 저장하므로 탭을 닫으면 로그아웃됩니다. 화면에서는 `useAuth`로 읽습니다.
-  - 로그아웃: 마이페이지 맨 아래 버튼을 누르고 확인 창에서 확정하면 로그인 화면으로 이동합니다.
+  - 로그아웃: 마이페이지 맨 아래 버튼을 누르고 확인 창에서 확정하면 브라우저의 토큰·Query 캐시를 비우고 로그인 화면으로 이동합니다. 서버 로그아웃 API는 아직 연결하지 않았습니다.
   - 회원가입: 입력값이 유효하면 로그인 화면으로 이동합니다. 가입 정보는 저장하지 않습니다.
   - 예약 확정: 확인 창에서 확정하면 선택한 날짜·시간으로 완료 화면으로 이동합니다.
   - 충전 완료: 예약 완료 화면과 충전 내역의 충전 중 카드에서 확인 창(`StopChargingDialog`)으로 확정하면 해당 화면 상태만 충전 완료로 바뀝니다. 두 화면의 상태는 서로 공유되지 않고, 새로고침하면 초기화됩니다.
 - 예약 날짜는 오늘부터 7일을 화면에서 만들고, 시작 시간은 예시 데이터입니다.
+- 로그인은 command의 실제 API를 호출하고, 성공 응답의 access·refresh 토큰을 `sessionStorage`에 보관합니다. `AuthProvider`가 로그인 상태를 제공하고 화면에서는 `useAuth`로 읽습니다. 두 서비스의 Axios 요청에 access 토큰을 첨부합니다. 자동 재발급은 아직 구현하지 않았습니다.
 - 예약 상세·차량 정보 수정·영수증 화면은 경로가 정해지지 않아 해당 버튼이 동작하지 않습니다.

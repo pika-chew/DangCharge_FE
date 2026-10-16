@@ -1,44 +1,28 @@
 import { useMemo, useState, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { AuthContext } from '@/hooks'
-
-// API 연결 전 데모용 로그인 표시입니다. 실제 인증 방식이 정해지면 이 Provider 안쪽만 교체합니다.
-const storageKey = 'dangcharge:demo-logged-in'
-
-function readLoggedIn() {
-  try {
-    return sessionStorage.getItem(storageKey) === 'true'
-  } catch {
-    return false
-  }
-}
-
-function writeLoggedIn(loggedIn: boolean) {
-  try {
-    if (loggedIn) sessionStorage.setItem(storageKey, 'true')
-    else sessionStorage.removeItem(storageKey)
-  } catch {
-    // 저장소를 쓸 수 없으면 현재 탭의 상태로만 유지합니다.
-  }
-}
+import { getAuthTokens, setAuthTokens, type AuthTokens } from '@/lib/auth'
 
 type AuthProviderProps = {
   children: ReactNode
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [isLoggedIn, setIsLoggedIn] = useState(readLoggedIn)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => getAuthTokens() !== null)
+  const queryClient = useQueryClient()
 
   const value = useMemo(() => ({
     isLoggedIn,
-    login: () => {
-      writeLoggedIn(true)
+    login: (tokens: AuthTokens) => {
+      setAuthTokens(tokens)
       setIsLoggedIn(true)
     },
     logout: () => {
-      writeLoggedIn(false)
+      setAuthTokens(null)
+      queryClient.clear()
       setIsLoggedIn(false)
     },
-  }), [isLoggedIn])
+  }), [isLoggedIn, queryClient])
 
   return <AuthContext value={value}>{children}</AuthContext>
 }
