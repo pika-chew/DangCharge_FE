@@ -31,7 +31,7 @@ export function StationList({
         <h2 className="text-base leading-6 font-bold" id="station-list-title">충전소 목록</h2>
         {!isLoading && !error && <span className="text-caption-12 text-fg-tertiary">{stations.length}곳</span>}
       </div>
-      <div className="grid min-h-0 content-start gap-3 overflow-y-auto">
+      <div className="grid min-h-0 flex-1 auto-rows-max content-start gap-3 overflow-y-auto">
         <LocationSummary
           query={query}
           radius={radius}
