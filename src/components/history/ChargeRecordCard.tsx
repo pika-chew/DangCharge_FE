@@ -1,5 +1,5 @@
 import { CalendarClock, Check, ClockCheck, MapPin } from 'lucide-react'
-import { ChargeRecordStat } from '@/components/history/ChargeRecordStat'
+import { StatGroup, StatItem } from '@/components/common'
 import { Button } from '@/components/ui'
 import type { SampleChargeRecord } from '@/types'
 
@@ -21,11 +21,11 @@ export function ChargeRecordCard({ record }: ChargeRecordCardProps) {
         <strong className="shrink-0 text-heading-20 text-fg-primary">{record.amount.toLocaleString('ko-KR')}원</strong>
       </div>
 
-      <dl className="mt-6 grid grid-cols-3 divide-x divide-line rounded-18 bg-canvas py-5">
-        <ChargeRecordStat icon={CalendarClock} value={record.reservedAt} label="예약 시각" />
-        <ChargeRecordStat icon={MapPin} value={record.stationName} label="충전소" />
-        <ChargeRecordStat icon={ClockCheck} value={record.completedAt} label="충전 완료 시각" />
-      </dl>
+      <StatGroup className="mt-6">
+        <StatItem icon={CalendarClock} value={record.reservedAt} label="예약 시각" />
+        <StatItem icon={MapPin} value={record.stationName} label="충전소" />
+        <StatItem icon={ClockCheck} value={record.completedAt} label="충전 완료 시각" />
+      </StatGroup>
 
       <Button
         variant="outline"
