@@ -51,6 +51,7 @@ export default function App() {
   return (
     <Routes>
       <Route element={<HeaderlessLayout />}>
+        <Route path="login" element={<LoginPage />} />
         <Route path="history" element={<HistoryPage />} />
         <Route path="reservation/:chargerId" element={<ReservationPage />} />
         <Route path="reservation/complete" element={<ReservationCompletePage />} />
@@ -60,7 +61,6 @@ export default function App() {
         <Route path="mypage" element={<MyPage />} />
         <Route path="stations/:stationId" element={<StationDetailPage />} />
         <Route element={<PlaceholderLayout />}>
-          <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignupPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

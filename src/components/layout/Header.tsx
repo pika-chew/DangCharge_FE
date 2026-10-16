@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router'
-import logoIcon from '@/assets/home/logo.svg'
 import userIcon from '@/assets/home/user.svg'
+import { Logo } from '@/components/layout/Logo'
 import { Button } from '@/components/ui'
 
 export type HeaderNavigation = 'mypage' | 'routes' | 'none'
@@ -20,12 +20,7 @@ export function Header({ navigation = 'routes' }: HeaderProps) {
   return (
     <header className="h-[75px] border-b border-[#ece8f1] bg-surface">
       <div className="mx-auto flex h-[74px] w-full max-w-[1180px] items-center justify-between px-6">
-        <Link className="inline-flex items-center gap-3 text-base leading-6 font-bold text-fg-primary no-underline" to="/" aria-label="당충전 홈">
-          <span className="grid size-10 place-items-center rounded-14 bg-brand">
-            <img src={logoIcon} alt="" />
-          </span>
-          <span>당충전</span>
-        </Link>
+        <Logo />
 
         {navigation !== 'none' && (
           <nav aria-label="주요 메뉴">
