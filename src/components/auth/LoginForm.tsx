@@ -1,7 +1,6 @@
-import { ArrowRight } from 'lucide-react'
-import { Link } from 'react-router'
+import { AuthSubmitButton } from '@/components/auth/AuthSubmitButton'
+import { AuthSwitchLink } from '@/components/auth/AuthSwitchLink'
 import { FormField } from '@/components/auth/FormField'
-import { Button } from '@/components/ui'
 import { useLoginForm } from '@/hooks'
 
 export function LoginForm() {
@@ -32,19 +31,9 @@ export function LoginForm() {
 
       {errors.root && <p className="mt-5 text-caption-12 text-destructive" role="alert">{errors.root.message}</p>}
 
-      <Button
-        className="mt-7 h-12 w-full gap-2 rounded-14 bg-brand text-body-14-strong text-fg-on-brand hover:bg-brand-hover"
-        type="submit"
-        disabled={isSubmitting}
-      >
-        로그인
-        <ArrowRight className="size-4" aria-hidden />
-      </Button>
+      <AuthSubmitButton label="로그인" disabled={isSubmitting} />
 
-      <p className="mt-7 text-center text-body-14 text-fg-secondary">
-        아직 계정이 없나요?{' '}
-        <Link className="font-bold text-brand no-underline" to="/signup">회원가입</Link>
-      </p>
+      <AuthSwitchLink question="아직 계정이 없나요?" linkLabel="회원가입" to="/signup" />
     </form>
   )
 }

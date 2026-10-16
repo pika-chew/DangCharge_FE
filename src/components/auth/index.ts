@@ -1,3 +1,7 @@
 export { AuthCard } from '@/components/auth/AuthCard'
+export { AuthSubmitButton } from '@/components/auth/AuthSubmitButton'
+export { AuthSwitchLink } from '@/components/auth/AuthSwitchLink'
 export { FormField } from '@/components/auth/FormField'
 export { LoginForm } from '@/components/auth/LoginForm'
+export { SignupForm } from '@/components/auth/SignupForm'
+export { VehicleModelSelect } from '@/components/auth/VehicleModelSelect'

@@ -11,3 +11,4 @@ export {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+export { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
