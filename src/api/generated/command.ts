@@ -297,10 +297,19 @@ export type ApiResponseDtoListChargerResponse = {
   error?: Error;
 };
 
+export type AvailableSlotResponseStatus = typeof AvailableSlotResponseStatus[keyof typeof AvailableSlotResponseStatus];
+
+
+export const AvailableSlotResponseStatus = {
+  enable: 'enable',
+  disable: 'disable',
+} as const;
+
 export type AvailableSlotResponse = {
   chargerId?: number;
   startAt?: string;
   endAt?: string;
+  status?: AvailableSlotResponseStatus;
 };
 
 export type ApiResponseDtoListAvailableSlotResponse = {
