@@ -1,27 +1,24 @@
-import { NavLink, Outlet, Route, Routes } from 'react-router'
-import { HistoryPage } from '../pages/HistoryPage'
-import { HomePage } from '../pages/HomePage'
-import { LoginPage } from '../pages/LoginPage'
-import { MyPage } from '../pages/MyPage'
-import { NotFoundPage } from '../pages/NotFoundPage'
-import { ReservationCompletePage } from '../pages/ReservationCompletePage'
-import { ReservationPage } from '../pages/ReservationPage'
-import { SignupPage } from '../pages/SignupPage'
-import { StationDetailPage } from '../pages/StationDetailPage'
+import { Outlet, Route, Routes, useLocation } from 'react-router'
+import { Header } from '@/components/layout'
+import {
+  HistoryPage,
+  LoginPage,
+  MainPage,
+  MyPage,
+  NotFoundPage,
+  ReservationCompletePage,
+  ReservationPage,
+  SignupPage,
+  StationDetailPage,
+} from '@/pages'
 
 function PageLayout() {
+  const isHome = useLocation().pathname === '/'
+
   return (
     <>
-      <header className="site-header">
-        <NavLink to="/" end>당충전</NavLink>
-        <nav aria-label="주요 메뉴">
-          <NavLink to="/history">충전 내역</NavLink>
-          <NavLink to="/mypage">마이페이지</NavLink>
-          <NavLink to="/login">로그인</NavLink>
-          <NavLink to="/signup">회원가입</NavLink>
-        </nav>
-      </header>
-      <main className="page-content">
+      <Header mainPage={isHome} />
+      <main className={isHome ? '' : 'mx-auto max-w-[960px] p-6'}>
         <Outlet />
       </main>
     </>
@@ -32,7 +29,7 @@ export default function App() {
   return (
     <Routes>
       <Route element={<PageLayout />}>
-        <Route index element={<HomePage />} />
+        <Route index element={<MainPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
         <Route path="mypage" element={<MyPage />} />
