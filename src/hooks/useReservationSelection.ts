@@ -21,16 +21,21 @@ function createDateOptions(today: Date): ReservationDateOption[] {
   })
 }
 
-export function useReservationSelection(startTimes: string[]) {
+export function useReservationSelection() {
   const [dateOptions] = useState(() => createDateOptions(new Date()))
   const [selectedDate, setSelectedDate] = useState(dateOptions[0].value)
-  const [selectedStartTime, setSelectedStartTime] = useState(() => startTimes[0])
+  const [selectedStartAt, setSelectedStartAt] = useState<string | undefined>()
+
+  const selectDate = (date: string) => {
+    setSelectedDate(date)
+    setSelectedStartAt(undefined)
+  }
 
   return {
     dateOptions,
     selectedDate,
-    setSelectedDate,
-    selectedStartTime,
-    setSelectedStartTime,
+    selectDate,
+    selectedStartAt,
+    setSelectedStartAt,
   }
 }

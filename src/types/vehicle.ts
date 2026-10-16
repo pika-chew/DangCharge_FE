@@ -1,4 +1,4 @@
-export type SampleVehicleModel = {
-  id: string
-  name: string
+export type VehicleModelOption = {
+  value: string
+  label: string
 }
