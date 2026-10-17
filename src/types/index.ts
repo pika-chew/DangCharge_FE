@@ -1,5 +1,5 @@
 export type { StationListItem, StationMarker, StationCoordinates, StationSearchArea } from '@/types/station'
-export type { SampleChargeRecord } from '@/types/history'
+export type { ChargingHistoryPage, ChargingHistoryRecord } from '@/types/history'
 export type { StationCharger, StationDetail } from '@/types/stationDetail'
 export type { ReservationDateOption, ReservationDetail, ReservationSlot } from '@/types/reservation'
 export type { VehicleModelOption } from '@/types/vehicle'
