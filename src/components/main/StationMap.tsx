@@ -63,8 +63,6 @@ export function StationMap({
       setSdkError('네이버 지도 인증에 실패했어요. Client ID와 Web 서비스 URL을 확인해주세요.')
     }
     window.navermap_authFailure = handleAuthFailure
-    setSdkRetryable(false)
-    setSdkError(undefined)
 
     void loadNaverMaps()
       .then((api) => { if (active) setMapsApi(api) })
@@ -227,8 +225,11 @@ export function StationMap({
               className="text-body-14 text-brand underline disabled:opacity-50"
               disabled={isRetrying}
               onClick={() => {
-                if (sdkError) setLoadAttempt((attempt) => attempt + 1)
-                else onRetry()
+                if (sdkError) {
+                  setSdkRetryable(false)
+                  setSdkError(undefined)
+                  setLoadAttempt((attempt) => attempt + 1)
+                } else onRetry()
               }}
             >
               {isRetrying ? '확인 중…' : '다시 시도'}

@@ -46,10 +46,10 @@ export function useStationSearch() {
     query: { enabled: isSearch && validQuery, select: selectStationSearchResults, retry: false },
   })
   const activeQuery = isSearch ? searchQuery : nearbyQuery
-  const nearbyStations = searchArea ? nearbyQuery.data ?? [] : []
-  const stations: StationListItem[] = isSearch
-    ? validQuery ? searchQuery.data ?? [] : []
-    : nearbyStations
+  const stations = useMemo<StationListItem[]>(() => {
+    if (isSearch) return validQuery ? searchQuery.data ?? [] : []
+    return location.coordinates ? nearbyQuery.data ?? [] : []
+  }, [isSearch, validQuery, searchQuery.data, nearbyQuery.data, location.coordinates])
   const selectedStation = stations.find((station) => selection?.query === query && station.id === selection.id)
     ?? stations[0]
   const stationLocationQueries = useQueries({
@@ -148,7 +148,7 @@ export function useStationSearch() {
 
   const selectStation = useCallback((id: number) => {
     setSelection({ query, id })
-  }, [query])
+  }, [query, setSelection])
 
   return {
     searchText,
