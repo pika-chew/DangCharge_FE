@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react'
 import { StationList } from '@/components/main/StationList'
 import { StationMap } from '@/components/main/StationMap'
 import { StationSearch } from '@/components/main/StationSearch'
@@ -10,7 +11,9 @@ export function MainPage() {
     inputError,
     query,
     stations,
+    mapStations,
     selectedStation,
+    focusedStationId,
     selectStation,
     userLocation,
     radius,
@@ -21,8 +24,20 @@ export function MainPage() {
     retry,
     isRetrying,
     canRetry,
+    mapIsLoading,
+    mapLoadingMessage,
+    mapError,
+    mapWarning,
+    retryMap,
+    isMapRetrying,
+    canRetryMap,
     handleSearch,
   } = useStationSearch()
+  const [listFocusRequest, setListFocusRequest] = useState<{ query: string; stationId: number }>()
+  const handleMarkerSelect = useCallback((stationId: number) => {
+    selectStation(stationId)
+    setListFocusRequest({ query, stationId })
+  }, [query, selectStation])
 
   return (
     <div className="min-h-[calc(100vh-75px)] bg-canvas">
@@ -40,14 +55,17 @@ export function MainPage() {
             query={query}
             radius={radius}
             userLocation={userLocation}
+            stations={mapStations}
             selectedStation={selectedStation}
-            stationCount={stations.length}
-            isLoading={isLoading}
-            loadingMessage={loadingMessage}
-            error={error}
-            onRetry={retry}
-            isRetrying={isRetrying}
-            canRetry={canRetry}
+            focusedStationId={focusedStationId}
+            isLoading={mapIsLoading}
+            loadingMessage={mapLoadingMessage}
+            error={mapError}
+            warning={mapWarning}
+            onRetry={retryMap}
+            isRetrying={isMapRetrying}
+            canRetry={canRetryMap}
+            onSelectStation={handleMarkerSelect}
           />
           <StationList
             stations={stations}
@@ -55,6 +73,7 @@ export function MainPage() {
             radius={radius}
             hasLocation={userLocation !== null}
             selectedStation={selectedStation}
+            focusRequest={listFocusRequest?.query === query ? listFocusRequest : undefined}
             onSelectStation={selectStation}
             isLoading={isLoading}
             loadingMessage={loadingMessage}

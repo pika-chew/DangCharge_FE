@@ -8,11 +8,11 @@ type AuthRequestConfig = InternalAxiosRequestConfig & {
 }
 
 const commandBaseURL = import.meta.env.VITE_COMMAND_API_URL
-  || (import.meta.env.DEV ? '/command' : 'https://api.dangcharge.cloud/command')
+  || '/command'
 
 const queryClient = axios.create({
   baseURL: import.meta.env.VITE_QUERY_API_URL
-    || (import.meta.env.DEV ? '/query' : 'https://api.dangcharge.cloud/query'),
+    || '/query',
 })
 
 const commandClient = axios.create({
