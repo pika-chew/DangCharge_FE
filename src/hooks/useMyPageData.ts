@@ -20,6 +20,7 @@ const reservationSchema = z.object({
 })
 
 export type MyReservation = z.infer<typeof reservationSchema>
+export type UserProfile = z.infer<typeof userSchema>
 
 function selectUser(response: queryApi.ApiResponseDtoUserResponse) {
   if (response.success !== true) {

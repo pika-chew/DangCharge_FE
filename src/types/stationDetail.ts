@@ -9,6 +9,8 @@ export type StationDetail = {
   id: number
   name: string
   address?: string
+  latitude?: number
+  longitude?: number
   rapidCount?: number
   slowCount?: number
   chargers: StationCharger[]

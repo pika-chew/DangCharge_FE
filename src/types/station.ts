@@ -4,6 +4,8 @@ export type StationListItem = {
   address?: string
   metro?: string
   city?: string
+  latitude?: number
+  longitude?: number
   distanceMeters?: number
   rapidCount?: number
   slowCount?: number

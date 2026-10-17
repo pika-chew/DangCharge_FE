@@ -63,8 +63,9 @@ export function MyPage() {
             icon={CarFront}
             title={vehicleModelsQuery.isPending ? '차종 이름을 불러오는 중…' : vehicleLabel ?? vehicleModel ?? '차종 정보 없음'}
             description="등록한 차량"
-            actionLabel="차량 정보 수정"
+            actionLabel="내 정보 수정"
             actionIcon={ChevronRight}
+            actionTo="/mypage/edit"
           />
         )}
       </div>

@@ -1,10 +1,18 @@
-export type SampleChargeRecord = {
-  id: string
-  status: 'charging' | 'completed'
-  date: string
-  reservedAt: string
-  // 충전 중이면 예약 기준 완료 예정 시각, 완료되었으면 실제 완료 시각입니다.
-  completedAt: string
-  stationName: string
-  amount: number
+export type ChargingHistoryRecord = {
+  reservationId: number
+  stationId?: number
+  stationName?: string
+  stationAddress?: string
+  vehicleModel?: string
+  reservedStartAt?: string
+  reservedEndAt?: string
+  chargingStartedAt?: string
+  completedAt?: string
+}
+
+export type ChargingHistoryPage = {
+  records: ChargingHistoryRecord[]
+  page: number
+  size: number
+  totalElements: number
 }

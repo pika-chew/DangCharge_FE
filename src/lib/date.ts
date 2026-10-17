@@ -18,10 +18,6 @@ export function formatRelativeDate(value: string, today = new Date()) {
   return `${month}월 ${day}일`
 }
 
-export function formatTime(date: Date) {
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-}
-
 export function formatReservationTime(value: string) {
   return new Intl.DateTimeFormat('ko-KR', {
     timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false, hourCycle: 'h23',
