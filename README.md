@@ -36,13 +36,15 @@ Orval 8은 Node.js 22.18 이상이 필요합니다. 생성한 파일과 명세�
 
 명세 주소는 `https://api.dangcharge.cloud/query/v3/api-docs`와 `https://api.dangcharge.cloud/command/v3/api-docs`입니다. 실행 시 API 주소는 `.env.example`을 참고해 `.env.local`에서 바꿀 수 있습니다. 주소에는 `/query` 또는 `/command`까지 포함합니다. 로컬 개발의 기본값은 `/query`·`/command`이며 Vite 프록시가 API 서버로 전달합니다.
 
-Vite 프록시는 개발 서버에서만 동작하며 끌 필요가 없습니다. 배포 환경에서도 API 주소 기본값은 `/query`·`/command`입니다. Cloudflare Pages에서는 `functions/_middleware.ts`가 이 경로의 `/api/v1` 요청을 `https://api.dangcharge.cloud`로 전달합니다. 브라우저는 프론트엔드와 같은 출처에 요청하므로 API 서버의 브라우저 CORS 허용 설정에 의존하지 않습니다. 다른 호스팅에서는 동일한 프록시를 구성하거나 절대 API 주소와 백엔드 CORS 허용을 설정해야 합니다.
+Vite 프록시는 개발 서버에서만 동작하며 끌 필요가 없습니다. 배포 환경에서도 API 주소 기본값은 `/query`·`/command`입니다. Cloudflare Workers에서는 `worker.ts`가 `functions/_middleware.ts`의 공통 프록시를 호출해 이 경로의 `/api/v1` 요청을 `https://api.dangcharge.cloud`로 전달합니다. 브라우저는 프론트엔드와 같은 출처에 요청하므로 API 서버의 브라우저 CORS 허용 설정에 의존하지 않습니다. 다른 호스팅에서는 동일한 프록시를 구성하거나 절대 API 주소와 백엔드 CORS 허용을 설정해야 합니다.
 
-## Cloudflare Pages 배포
+## Cloudflare Workers 배포
 
-Git 연동 Pages 프로젝트의 Production branch를 `main`, 빌드 명령을 `pnpm build`, 출력 폴더를 `dist`로 설정합니다. 프로젝트 루트의 `functions/`도 함께 배포되어야 하므로 `dist`만 대시보드에 드래그해서 올리는 방식은 사용하지 않습니다.
+현재 서비스는 Workers Builds의 `npx wrangler deploy`로 배포합니다. Git 연동 프로젝트의 배포 브랜치를 `main`, 빌드 명령을 `pnpm run build`, 배포 명령을 `npx wrangler deploy`로 설정합니다. `wrangler.jsonc`가 Worker 이름(`dangcharge`), 진입 파일(`worker.ts`), 정적 파일 폴더(`dist`)를 지정하므로 Wrangler의 자동 프로젝트 설정에 의존하지 않습니다.
 
-Production과 Preview의 빌드 환경변수를 아래처럼 설정합니다. 환경변수 변경 후에는 다시 배포해야 합니다.
+`assets.run_worker_first`는 `/query`·`/command` 경로를 정적 HTML보다 먼저 Worker에서 처리하게 합니다. 나머지 경로는 SPA 정적 파일로 제공합니다. API 도메인으로 이동시키는 Cloudflare Redirect Rule은 비활성화 상태로 유지합니다.
+
+Workers Builds의 Settings > Build에 있는 빌드 환경변수를 아래처럼 설정합니다. Worker 런타임의 Variables and Secrets에만 넣으면 Vite 빌드에는 반영되지 않습니다. 환경변수 변경 후에는 다시 빌드·배포해야 합니다.
 
 ```dotenv
 VITE_QUERY_API_URL=/query
@@ -50,7 +52,9 @@ VITE_COMMAND_API_URL=/command
 VITE_NAVER_MAP_CLIENT_ID=네이버_Maps_애플리케이션_Client_ID
 ```
 
-API 주소 두 개는 생략해도 같은 기본값을 사용합니다. 기존 환경변수가 절대 API 주소라면 위 상대 주소로 바꿔야 Pages Function을 거칩니다. `public/_routes.json`은 API 경로에만 Function을 실행하도록 제한합니다. API 호출에는 Cloudflare Pages Functions의 이용 한도가 적용됩니다.
+API 주소 두 개는 생략해도 같은 기본값을 사용합니다. 기존 환경변수가 절대 API 주소라면 위 상대 주소로 바꿔야 Worker 프록시를 거칩니다. API 호출에는 Cloudflare Workers의 이용 한도가 적용됩니다.
+
+별도로 Pages에 배포할 경우 `functions/_middleware.ts`와 `public/_routes.json`을 사용합니다. 이 두 파일만으로는 `wrangler deploy`를 사용하는 Workers에 API 프록시가 배포되지 않습니다.
 
 네이버 콘솔에서는 같은 애플리케이션에 Web Dynamic Map과 Geocoding을 활성화하고, 실제 배포 도메인을 Web 서비스 URL로 등록합니다. Preview 도메인에서도 지도를 사용하려면 해당 주소도 등록해야 합니다. Client Secret은 프론트엔드 환경변수에 넣지 않습니다.
 

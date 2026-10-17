@@ -11,6 +11,7 @@ node_modules
 .ci-tools
 dist
 dist-ssr
+.wrangler
 .env*
 !.env.example
 *.local
