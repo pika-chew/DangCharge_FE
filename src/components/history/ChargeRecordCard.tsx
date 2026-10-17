@@ -1,57 +1,52 @@
-import { CalendarClock, Check, ClockCheck, MapPin, Zap } from 'lucide-react'
-import { StatGroup, StatItem, StopChargingDialog } from '@/components/common'
-import { Button } from '@/components/ui'
-import { cn } from '@/lib/utils'
-import type { SampleChargeRecord } from '@/types'
+import { CalendarClock, CarFront, Check, ClockCheck, MapPin, Zap } from 'lucide-react'
+import { StatGroup, StatItem } from '@/components/common'
+import { formatReservationDateTime } from '@/lib/date'
+import type { ChargingHistoryRecord } from '@/types'
 
 type ChargeRecordCardProps = {
-  record: SampleChargeRecord
-  onCompleteCharging: (recordId: string) => void
+  record: ChargingHistoryRecord
 }
 
-export function ChargeRecordCard({ record, onCompleteCharging }: ChargeRecordCardProps) {
-  const charging = record.status === 'charging'
-  const StatusIcon = charging ? Zap : Check
+function formatDateTime(value?: string) {
+  return value ? formatReservationDateTime(value) ?? '시간 정보 없음' : '시간 정보 없음'
+}
+
+function formatVehicleModel(value?: string) {
+  return value?.replaceAll('_', ' ') ?? '차종 정보 없음'
+}
+
+export function ChargeRecordCard({ record }: ChargeRecordCardProps) {
+  const completedAt = formatDateTime(record.completedAt)
 
   return (
     <article className="rounded-26 border border-line bg-surface p-7 shadow-card">
       <div className="flex items-center gap-3">
-        <span
-          className={cn(
-            'grid size-11 shrink-0 place-items-center rounded-14',
-            charging ? 'bg-brand-subtle text-brand' : 'bg-success-subtle text-success',
-          )}
-        >
-          <StatusIcon className="size-[18px]" aria-hidden />
+        <span className="grid size-11 shrink-0 place-items-center rounded-14 bg-success-subtle text-success">
+          <Check className="size-[18px]" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-body-14-strong text-fg-primary">{charging ? '충전 중' : '충전 완료'}</h2>
-          <p className="mt-1 text-caption-12 text-fg-secondary">
-            {record.date} · {charging ? `${record.reservedAt} 시작` : record.completedAt}
-          </p>
+          <h2 className="truncate text-body-14-strong text-fg-primary">{record.stationName ?? '충전소 정보 없음'}</h2>
+          <p className="mt-1 text-caption-12 text-fg-secondary">{completedAt}</p>
         </div>
-        <strong className="shrink-0 text-heading-20 text-fg-primary">{record.amount.toLocaleString('ko-KR')}원</strong>
+        <span className="shrink-0 rounded-full bg-success-subtle px-3 py-1 text-label-12 text-success">충전 완료</span>
+      </div>
+
+      <div className="mt-5 grid gap-2 text-caption-12 text-fg-secondary">
+        <p className="flex items-center gap-2">
+          <MapPin className="size-4 shrink-0 text-brand" aria-hidden />
+          {record.stationAddress ?? '주소 정보 없음'}
+        </p>
+        <p className="flex items-center gap-2">
+          <CarFront className="size-4 shrink-0 text-brand" aria-hidden />
+          {formatVehicleModel(record.vehicleModel)}
+        </p>
       </div>
 
       <StatGroup className="mt-6">
-        <StatItem icon={CalendarClock} value={record.reservedAt} label="예약 시각" />
-        <StatItem icon={MapPin} value={record.stationName} label="충전소" />
-        <StatItem icon={ClockCheck} value={record.completedAt} label={charging ? '완료 예정 시각' : '충전 완료 시각'} />
+        <StatItem icon={CalendarClock} value={formatDateTime(record.reservedStartAt)} label="예약 시각" />
+        <StatItem icon={Zap} value={formatDateTime(record.chargingStartedAt)} label="충전 시작" />
+        <StatItem icon={ClockCheck} value={completedAt} label="충전 완료" />
       </StatGroup>
-
-      <div className="mt-6">
-        {charging ? (
-          <StopChargingDialog onConfirm={() => onCompleteCharging(record.id)} />
-        ) : (
-          <Button
-            variant="outline"
-            className="h-[46px] w-full rounded-14 border-line bg-surface text-body-14-strong text-fg-secondary hover:bg-canvas"
-            type="button"
-          >
-            영수증 확인하기
-          </Button>
-        )}
-      </div>
     </article>
   )
 }

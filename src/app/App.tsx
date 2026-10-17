@@ -2,6 +2,7 @@ import { Outlet, Route, Routes, useLocation } from 'react-router'
 import { GuestOnly, RequireAuth } from '@/components/auth'
 import { Header } from '@/components/layout'
 import {
+  EditProfilePage,
   HistoryPage,
   LoginPage,
   MainPage,
@@ -46,6 +47,7 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<HeaderlessLayout />}>
           <Route path="history" element={<HistoryPage />} />
+          <Route path="mypage/edit" element={<EditProfilePage />} />
           <Route path="stations/:stationId/reservation/:chargerId" element={<ReservationPage />} />
           <Route path="reservation/complete/:reservationId" element={<ReservationCompletePage />} />
         </Route>

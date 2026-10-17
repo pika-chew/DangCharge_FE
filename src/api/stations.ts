@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { getServerErrorMessage } from './errors'
 import { AvailableSlotResponseStatus, ChargerResponseChargingType, ChargerResponseStatus } from './generated/query'
 import type { ApiResponseDtoListAvailableSlotResponse, ApiResponseDtoListStationMarkerResponse, ApiResponseDtoListStationSummaryResponse, ApiResponseDtoStationDetailResponse } from './generated/query'
-import type { ReservationSlot, StationDetail, StationListItem, StationMarker } from '@/types'
+import type { ReservationSlot, StationDetail, StationListItem } from '@/types'
 
 const stationFields = {
   stationId: z.number().int(),
@@ -13,8 +13,11 @@ const optionalCount = z.number().int().nonnegative().nullish()
 
 const markerListSchema = z.array(z.object({
   ...stationFields,
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
+  address: z.string().nullish(),
+  metro: z.string().nullish(),
+  city: z.string().nullish(),
+  latitude: z.number().min(-90).max(90).nullish(),
+  longitude: z.number().min(-180).max(180).nullish(),
   availableChargerCount: optionalCount,
   distanceMeters: z.number().nonnegative().nullish(),
 }))
@@ -31,6 +34,8 @@ const searchListSchema = z.array(z.object({
 const stationDetailSchema = z.object({
   ...stationFields,
   address: z.string().nullish(),
+  latitude: z.number().min(-90).max(90).nullish(),
+  longitude: z.number().min(-180).max(180).nullish(),
   rapidCount: optionalCount,
   slowCount: optionalCount,
   chargers: z.array(z.object({
@@ -48,7 +53,7 @@ const availabilitySchema = z.array(z.object({
   status: z.enum(AvailableSlotResponseStatus),
 }))
 
-export function selectStationMarkers(response: ApiResponseDtoListStationMarkerResponse): StationMarker[] {
+export function selectStationMarkers(response: ApiResponseDtoListStationMarkerResponse): StationListItem[] {
   if (response.success !== true) {
     throw new Error(getServerErrorMessage(response) ?? '주변 충전소를 불러오지 못했어요.')
   }
@@ -59,8 +64,11 @@ export function selectStationMarkers(response: ApiResponseDtoListStationMarkerRe
   return result.data.map((station) => ({
     id: station.stationId,
     name: station.name,
-    latitude: station.latitude,
-    longitude: station.longitude,
+    address: station.address?.trim() || undefined,
+    metro: station.metro?.trim() || undefined,
+    city: station.city?.trim() || undefined,
+    latitude: station.latitude ?? undefined,
+    longitude: station.longitude ?? undefined,
     availableChargerCount: station.availableChargerCount ?? undefined,
     distanceMeters: station.distanceMeters ?? undefined,
   }))
@@ -77,7 +85,7 @@ export function selectStationSearchResults(response: ApiResponseDtoListStationSu
   return result.data.map((station) => ({
     id: station.stationId,
     name: station.name,
-    address: station.address?.trim() || [station.metro, station.city].filter(Boolean).join(' ') || undefined,
+    address: station.address?.trim() || undefined,
     metro: station.metro?.trim() || undefined,
     city: station.city?.trim() || undefined,
     rapidCount: station.rapidCount ?? undefined,
@@ -98,6 +106,8 @@ export function selectStationDetail(response: ApiResponseDtoStationDetailRespons
     id: station.stationId,
     name: station.name,
     address: station.address?.trim() || undefined,
+    latitude: station.latitude ?? undefined,
+    longitude: station.longitude ?? undefined,
     rapidCount: station.rapidCount ?? undefined,
     slowCount: station.slowCount ?? undefined,
     chargers: (station.chargers ?? []).map((charger) => ({

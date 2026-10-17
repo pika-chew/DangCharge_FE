@@ -1,4 +1,5 @@
 export { MainPage } from '@/pages/MainPage'
+export { EditProfilePage } from '@/pages/EditProfilePage'
 export { HistoryPage } from '@/pages/HistoryPage'
 export { LoginPage } from '@/pages/LoginPage'
 export { MyPage } from '@/pages/MyPage'

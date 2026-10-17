@@ -36,7 +36,25 @@ Orval 8은 Node.js 22.18 이상이 필요합니다. 생성한 파일과 명세�
 
 명세 주소는 `https://api.dangcharge.cloud/query/v3/api-docs`와 `https://api.dangcharge.cloud/command/v3/api-docs`입니다. 실행 시 API 주소는 `.env.example`을 참고해 `.env.local`에서 바꿀 수 있습니다. 주소에는 `/query` 또는 `/command`까지 포함합니다. 로컬 개발의 기본값은 `/query`·`/command`이며 Vite 프록시가 API 서버로 전달합니다.
 
-Vite 프록시는 개발 서버에서만 동작합니다. 배포 시에는 API 서버에서 프론트엔드 출처에 대한 CORS를 허용하거나 배포 서버에 같은 프록시 경로를 구성해야 합니다. 환경변수가 없으면 배포 빌드는 `https://api.dangcharge.cloud`의 각 서비스 주소로 직접 요청합니다. 상대 주소로 설정해 빌드했다면 배포 서버의 프록시가 필요합니다.
+Vite 프록시는 개발 서버에서만 동작하며 끌 필요가 없습니다. 배포 환경에서도 API 주소 기본값은 `/query`·`/command`입니다. Cloudflare Pages에서는 `functions/_middleware.ts`가 이 경로의 `/api/v1` 요청을 `https://api.dangcharge.cloud`로 전달합니다. 브라우저는 프론트엔드와 같은 출처에 요청하므로 API 서버의 브라우저 CORS 허용 설정에 의존하지 않습니다. 다른 호스팅에서는 동일한 프록시를 구성하거나 절대 API 주소와 백엔드 CORS 허용을 설정해야 합니다.
+
+## Cloudflare Pages 배포
+
+Git 연동 Pages 프로젝트의 Production branch를 `main`, 빌드 명령을 `pnpm build`, 출력 폴더를 `dist`로 설정합니다. 프로젝트 루트의 `functions/`도 함께 배포되어야 하므로 `dist`만 대시보드에 드래그해서 올리는 방식은 사용하지 않습니다.
+
+Production과 Preview의 빌드 환경변수를 아래처럼 설정합니다. 환경변수 변경 후에는 다시 배포해야 합니다.
+
+```dotenv
+VITE_QUERY_API_URL=/query
+VITE_COMMAND_API_URL=/command
+VITE_NAVER_MAP_CLIENT_ID=네이버_Maps_애플리케이션_Client_ID
+```
+
+API 주소 두 개는 생략해도 같은 기본값을 사용합니다. 기존 환경변수가 절대 API 주소라면 위 상대 주소로 바꿔야 Pages Function을 거칩니다. `public/_routes.json`은 API 경로에만 Function을 실행하도록 제한합니다. API 호출에는 Cloudflare Pages Functions의 이용 한도가 적용됩니다.
+
+네이버 콘솔에서는 같은 애플리케이션에 Web Dynamic Map과 Geocoding을 활성화하고, 실제 배포 도메인을 Web 서비스 URL로 등록합니다. Preview 도메인에서도 지도를 사용하려면 해당 주소도 등록해야 합니다. Client Secret은 프론트엔드 환경변수에 넣지 않습니다.
+
+충전소 검색 결과는 백엔드에서 가져오고 좌표가 없으면 주소를 네이버 Geocoding으로 변환해 지도에 표시합니다. 같은 주소의 결과는 Query 캐시로 재사용하고, 주소 변환 요청은 최대 4개씩 실행합니다. Geocoding에는 네이버의 별도 이용 한도와 요금이 적용됩니다.
 
 `QueryClientProvider`는 앱 진입점에 연결되어 있습니다. 로그인·회원가입은 생성된 command 훅으로, 차종 목록은 query 훅으로 실제 API를 호출합니다. 나머지 화면 데이터는 아직 예시 데이터입니다.
 

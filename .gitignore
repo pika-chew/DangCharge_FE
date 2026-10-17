@@ -11,6 +11,8 @@ node_modules
 .ci-tools
 dist
 dist-ssr
+.env*
+!.env.example
 *.local
 
 # Editor directories and files
