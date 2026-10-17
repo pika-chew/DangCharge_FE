@@ -1,4 +1,5 @@
 export { ChargeHistoryLink } from '@/components/mypage/ChargeHistoryLink'
+export { EditProfileForm } from '@/components/mypage/EditProfileForm'
 export { SummaryCard } from '@/components/mypage/SummaryCard'
 export { LogoutButton } from '@/components/mypage/LogoutButton'
 export { ReservationStatusCard } from '@/components/mypage/ReservationStatusCard'
